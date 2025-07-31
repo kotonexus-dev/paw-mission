@@ -1,0 +1,54 @@
+# http_request_duration_secondsはFastAPI Exporterが提供するメトリクス
+# node_cpu_seconds_totalはNode Exporterが提供するメトリクス
+
+groups:
+  - name: app-alerts
+    rules:
+      # レスポンスタイムが平均3秒を超えたら通知
+      - alert: HighResponseTime
+        expr: avg_over_time(http_request_duration_seconds[5m]) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "レスポンスタイムが高騰しています"
+          description: "HTTPレスポンスの平均時間が5分間で3秒を超えました。"
+
+      # CPU使用率が90％を超えたら通知
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance)(irate(node_cpu_seconds_total{mode="idle"}[1m])) * 100) > 90
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CPU使用率が高すぎます"
+          description: "CPU使用率が1分間90%を超えています。"
+# テスト用
+#      - alert: AlwaysFires
+#        expr: vector(1)
+#        for: 0m
+#        labels:
+#          severity: info
+#        annotations:
+#          summary: "テスト通知"
+#          description: "これは常に発火するテスト用のアラートです"
+
+# テスト用①：レスポンスタイムテスト
+#      - alert: HighResponseTime2
+#        expr: (rate(http_request_duration_seconds_sum{handler="/slow"}[1m]) / rate(http_request_duration_seconds_count{handler="/slow"}[1m])) > 1
+#        for: 30s
+#        labels:
+#          severity: warning
+#        annotations:
+#          summary: "レスポンスタイムが高騰しています"
+#          description: "HTTPレスポンスの平均時間が30秒間で1秒を超えました。"
+
+# テスト用②：CPU使用率が1％を超えたら通知
+#      - alert: HighCPUUsage2
+#        expr: 100 - (avg by(instance)(irate(node_cpu_seconds_total{mode="idle"}[1m])) * 100) > 0.5
+#        for: 10s
+#        labels:
+#          severity: critical
+#        annotations:
+#          summary: "CPU使用率が高すぎます"
+#          description: "CPU使用率が10秒間0.5%を超えています。"

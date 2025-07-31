@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-weight: bold;
+  color: #222831;  /* 見出しはやや濃いダークグレー */
+}
+
+p, span, li, ul {
+  color: #444;      /* 本文はやや柔らかいグレー */
+}

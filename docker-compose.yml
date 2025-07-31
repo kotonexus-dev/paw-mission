@@ -1,0 +1,113 @@
+services:
+  db:
+    image: postgres:15
+    container_name: myapp_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: myapp_db
+    restart: always
+    ports:
+      - "5433:5432" # ホスト5433→コンテナ5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Postgres Exporter
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter
+    container_name: postgres_exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@db:5432/myapp_db?sslmode=disable"
+    depends_on:
+      - db
+    ports:
+      - "9187:9187" # Prometheusが参照するポート
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - "9090:9090" # Prometheus Web UI
+    depends_on:
+      - postgres-exporter
+
+  # Alertmanager
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+    ports:
+      - "9093:9093"
+    depends_on:
+      - prometheus
+
+  # Node Exporter
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    pid: "host"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+
+  # Redis
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  # Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter
+    container_name: redis_exporter
+    restart: unless-stopped
+    ports:
+      - "9121:9121" # Prometheusがアクセスするポート
+    command:
+      - "--redis.addr=redis://redis:6379"
+    depends_on:
+      - redis
+
+  # Grafana
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000" # ホスト:3001 → Grafana:3000（FastAPIと被らないよう注意）
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+
+volumes:
+  pgdata:
+  redis-data:
+  grafana-data:

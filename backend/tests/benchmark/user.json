@@ -1,0 +1,6 @@
+{
+  "firebase_uid": "test-uid-123",
+  "email": "testuser@example.com",
+  "current_plan": "free",
+  "is_verified": true
+}

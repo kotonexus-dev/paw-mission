@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-py"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id            String          @id @default(uuid())
+  firebase_uid  String          @unique
+  email         String          @unique
+  current_plan  String?
+  is_verified   Boolean?
+  created_at    DateTime?       @default(now())
+  updated_at    DateTime?       @updatedAt
+  care_settings care_settings[]
+  payment       payment[]
+}
+
+model care_settings {
+  id                Int                @id @default(autoincrement())
+  user_id           String
+  parent_name       String?
+  child_name        String?
+  dog_name          String?
+  care_start_date   DateTime?
+  care_end_date     DateTime?
+  morning_meal_time DateTime?
+  night_meal_time   DateTime?
+  walk_time         DateTime?
+  care_clear_status String?
+  created_at        DateTime?          @default(now())
+  updated_at        DateTime?          @updatedAt
+  care_password          String?
+  care_logs         care_logs[]
+  user              users              @relation(fields: [user_id], references: [id])
+  reflection_notes  reflection_notes[]
+}
+
+model care_logs {
+  id                    Int           @id @default(autoincrement())
+  care_setting_id       Int
+  date                  String
+  fed_morning           Boolean?
+  fed_night             Boolean?
+  created_at            DateTime?     @default(now())
+  walk_result           Boolean?
+  walk_total_distance_m Int?
+  care_setting          care_settings @relation(fields: [care_setting_id], references: [id])
+}
+
+model reflection_notes {
+  id                 Int           @id @default(autoincrement())
+  care_setting_id    Int
+  content            String?
+  approved_by_parent Boolean       @default(false)
+  created_at         DateTime?     @default(now())
+  updated_at         DateTime?     @updatedAt
+  care_setting       care_settings @relation(fields: [care_setting_id], references: [id])
+}
+
+model payment {
+  id                       Int       @id @default(autoincrement())
+  user_id                  String
+  firebase_uid             String?
+  stripe_session_id        String    @unique
+  stripe_payment_intent_id String?
+  stripe_charge_id         String?
+  amount                   Int?
+  currency                 String?
+  status                   String?
+  created_at               DateTime? @default(now())
+  user                     users     @relation(fields: [user_id], references: [id])
+}
+
+model webhook_events {
+  id                       String    @id
+  event_type               String?
+  stripe_session_id        String?
+  stripe_payment_intent_id String?
+  customer_email           String?
+  amount                   Int?
+  currency                 String?
+  payment_status           String?
+  payload                  Json?
+  received_at              DateTime? @default(now())
+  processed                Boolean   @default(false)
+  error_message            String?
+  firebase_uid             String?
+}

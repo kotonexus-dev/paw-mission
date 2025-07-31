@@ -1,0 +1,16 @@
+# Pylint 設定
+
+[MASTER]
+init-hook='import sys; sys.path.append(".")'
+
+[FORMAT]
+max-line-length=88
+
+[MESSAGES CONTROL]
+disable=C0114,C0115,C0116  # docstring系の警告を一時無効化例
+
+[DESIGN]
+max-args=7
+max-locals=15
+max-returns=6
+max-branches=12

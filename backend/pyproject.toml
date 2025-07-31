@@ -1,0 +1,41 @@
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | \.tox
+  | \.pytest_cache
+  | __pycache__
+)/
+'''
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = [
+    "--cov=app",
+    "--cov-report=html:coverage_html",
+    "--cov-report=term-missing",
+    "--cov-report=lcov:coverage.lcov",
+    "--cov-fail-under=80"
+]
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "app/__init__.py",
+    "app/config.py",
+    "*/venv/*",
+    "*/tests/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError"
+]

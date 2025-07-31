@@ -1,0 +1,27 @@
+global:
+  scrape_interval: 15s # メトリクス収集間隔
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"] # docker-compose内のサービス名
+
+rule_files:
+  - "alert_rules.yml" # アラートルールを定義したファイル
+
+scrape_configs:
+  - job_name: "postgres"
+    static_configs:
+      - targets: ["postgres-exporter:9187"] # Postgres Exporter のホスト名とポート
+
+  - job_name: "fastapi"
+    static_configs:
+      - targets: ["host.docker.internal:8000"]
+
+  - job_name: "node_exporter"
+    static_configs:
+      - targets: ["node-exporter:9100"]
+
+  - job_name: "redis"
+    static_configs:
+      - targets: ["redis-exporter:9121"]

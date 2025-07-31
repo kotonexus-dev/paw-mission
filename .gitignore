@@ -1,0 +1,64 @@
+# Dependencies
+**/node_modules/
+**/venv/
+**/.venv/
+
+# Environment
+**/.env
+**/.env.*
+!**/.env.example
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/*.so
+
+# Database
+**/db-data/
+**/generated/prisma
+**/*.sqlite
+**/*.db
+
+# Build outputs
+**/.next/
+**/build/
+**/dist/
+
+# Firebase
+**/serviceAccountKey.json
+**/.service-account.json
+**/.firebase.json
+**/.adminsdk.json
+
+# TypeScript build cache
+**/*.tsbuildinfo
+
+# IDE
+**/.vscode/
+
+# OS generated
+**/.DS_Store
+**/*.pem
+**/Thumbs.db
+
+# Testing
+**/coverage/
+**/.coverage
+**/htmlcov/
+**/coverage.lcov
+**/coverage-integration/
+
+# prisma
+**/generated/client
+**/backend/prisma/prisma
+**/backend/prisma/prisma-client
+
+# Firebase Admin SDK
+**/wan-mission-firebase-adminsdk-fbsvc-b24aa18832.json
+**/my-paw-mission-firebase-adminsdk-fbsvc-3e97fe0294.json
+
+# monitoring
+**/alertmanager.yml
+
+**/.swc
+

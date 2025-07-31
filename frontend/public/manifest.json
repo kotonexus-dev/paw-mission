@@ -1,0 +1,21 @@
+{
+  "name": "わん🐾みっしょん",
+  "short_name": "わんみしょん",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "description": "お子さまとわんちゃんが一緒に成長できる、楽しいペットお世話体験アプリ",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

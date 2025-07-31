@@ -1,0 +1,44 @@
+# --- FastAPI related ---
+fastapi==0.115.1
+uvicorn==0.34.0
+
+# --- Prisma Python client ---
+prisma==0.15.0
+
+# --- Core Dependencies ---
+click==8.1.7
+httpx==0.27.0  # OpenAI client
+jinja2==3.1.3
+nodeenv==1.8.0
+pydantic==2.11.1
+python-dotenv==1.1.0
+tomlkit==0.12.4
+typing-extensions==4.12.2
+
+# --- Third Party APIs ---
+openai==1.30.3
+stripe==9.9.0
+firebase-admin==6.5.0
+
+# --- Additional Dependencies ---
+anyio==4.0.0
+distro==1.8.0
+sniffio==1.3.0
+tqdm==4.66.0
+
+# --- Development Tools ---
+black==23.12.0
+pylint==3.0.3
+
+# --- Testing ---
+pytest==8.2.2
+pytest-asyncio==0.23.7
+pytest-cov==6.0.0
+
+# --- monitoring ---
+prometheus-fastapi-instrumentator==5.9.1
+
+# --- Caching ---
+fastapi-cache2==0.2.1
+redis[asyncio]==5.0.4
+
