@@ -1,6 +1,6 @@
 # わん 🐾 みっしょん
 
-[https://github.com/ms-engineer-bc25-04/Section9_TeamC/issues/75](https://github.com/user-attachments/assets/4dda2fcb-8ffa-4529-9185-097a2b21f569)
+[https://github.com/kotonexus-dev/paw-mission/issues/1](https://github.com/user-attachments/assets/5f33c33a-f4be-45d7-96e6-7203ce827f71)
 
 ## プロジェクト概要
 
