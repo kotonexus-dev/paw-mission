@@ -30,7 +30,7 @@ export default function WelcomePage() {
             <div className="relative w-40 h-40 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-full overflow-hidden bg-white shadow">
               {/* <div className="relative w-40 h-40 sm:w-56 sm:h-56 md:w-64 md:h-64 pet-bag-container"> */}
               <Image
-                src={`${process.env.NEXT_PUBLIC_S3_BUCKET_URL}/images/dog-house.jpg`}
+                src="/images/dog-house.jpg"
                 alt="ワンちゃんの家"
                 fill
                 style={{ objectFit: 'cover' }}
