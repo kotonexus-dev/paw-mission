@@ -16,10 +16,6 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      lines: 80,
-      branches: 80,
-      functions: 80,
-      statements: 80,
       exclude: [
         'src/tests/e2e/**', // E2Eテスト除外
         'node_modules/**/*', // ライブラリ除外

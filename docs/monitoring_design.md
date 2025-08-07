@@ -161,11 +161,9 @@ docker ps
 docker compose stop prometheus alertmanager postgres-exporter node-exporter
 ```
 
-### ---------------　　！！ここからは余裕があれば！！　　------------------
-
 ## 手順 ⑤：起動確認テスト
 
-### 1⃣Section9_TeamC\monitoring\alert_rules.yml の以下のコード有効化
+### 1 Section9_TeamC\monitoring\alert_rules.yml の以下のコード有効化
 
 - #テスト用 ①：レスポンスタイムテスト
 
@@ -194,7 +192,7 @@ docker compose stop prometheus alertmanager postgres-exporter node-exporter
 
 ```
 
-### 2⃣backend/app/main.py の一番下のコード有効化
+### 2 backend/app/main.py の一番下のコード有効化
 
 ```bash
 # レスポンスタイム遅延テスト用エンドポイント
@@ -207,7 +205,7 @@ docker compose stop prometheus alertmanager postgres-exporter node-exporter
      return {"message": "This is a slow response"}
 ```
 
-### 3⃣postman でエンドポイント叩きまくる 🌱
+### 3 postman でエンドポイント叩きまくる
 
 ```bash
 GET http://localhost:8000/slow
@@ -215,11 +213,11 @@ GET http://localhost:8000/slow
 
 [`http://localhost:9090/alerts`](http://localhost:9090/alerts)にアクセスして、HighResponseTime2 が`PENDING`になればもうすぐ！`FIRING`になればメール届く（1 分後に届くことも！※時差有）
 
-### 4⃣ メール届いたら、「レスポンスタイムが〇秒を超えた場合にメール通知」テストクリア！
+### 4 メール届いたら、「レスポンスタイムが〇秒を超えた場合にメール通知」テストクリア！
 
 ---
 
-### 5⃣mac ユーザー向け：CPU 使用率を上げるコマンド
+### 5 mac ユーザー向け：CPU 使用率を上げるコマンド
 
 ```bash
 yes > /dev/null &
@@ -248,7 +246,7 @@ yes > /dev/null &
 killall yes
 ```
 
-### 5⃣Windows ユーザー向け：CPU 使用率を上げるコマンド
+### 5 Windows ユーザー向け：CPU 使用率を上げるコマンド
 
 ```bash
 Start-Job { while ($true) {} }
@@ -264,4 +262,4 @@ Get-Job | Stop-Job
 Get-Job | Remove-Job
 ```
 
-### 6⃣ メール届けば「サーバーの CPU 使用率が〇％を超えたらアラート発生」テストクリア！
+### 6 メール届けば「サーバーの CPU 使用率が〇％を超えたらアラート発生」テストクリア！
