@@ -65,7 +65,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
-      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TEST }}
+      FIREBASE_SERVICE_ACCOUNT: '{"type":"service_account","project_id":"dummy-project","private_key_id":"dummy","private_key":"-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDummy\n-----END PRIVATE KEY-----\n","client_email":"dummy@dummy-project.iam.gserviceaccount.com","client_id":"dummy","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token"}'
 
     steps:
       - name: Checkout repository
