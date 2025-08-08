@@ -11,9 +11,9 @@ import { toast } from 'sonner';
 export default function PaymentPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const user = useAuth(); // 認証情報を取得
+  const user = useAuth();
 
-  console.log('[PaymentPage] User:', user.currentUser);
+  // console.log('[PaymentPage] User:', user.currentUser);
 
   const features = [
     {
@@ -36,13 +36,13 @@ export default function PaymentPage() {
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      console.log('firebaseUidを確認:', user.currentUser?.uid);
+      // console.log('firebaseUidを確認:', user.currentUser?.uid);
       const token = await user.currentUser?.getIdToken(); // FirebaseのIDトークンを取得
 
       if (!token) {
-        console.error(
-          'Firebaseトークンが取得できません。ログイン状態を確認してください。'
-        );
+        // console.error(
+        //   'Firebaseトークンが取得できません。ログイン状態を確認してください。'
+        // );
         return;
       }
       const res = await fetch(
@@ -72,10 +72,10 @@ export default function PaymentPage() {
         window.location.href = data.url;
       } else {
         // URLが取得できなかった場合のエラーハンドリング
-        console.error('決済ページURLの取得に失敗しました。');
+        // console.error('決済ページURLの取得に失敗しました。');
       }
     } catch (error) {
-      console.error('決済ページへの遷移中にエラーが発生しました。', error);
+      // console.error('決済ページへの遷移中にエラーが発生しました。', error);
     } finally {
       setLoading(false);
     }

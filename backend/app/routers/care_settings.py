@@ -19,8 +19,8 @@ from app.schemas.care_settings import (
 
 from app.dependencies import verify_firebase_token
 
-from fastapi_cache.decorator import cache
-from fastapi_cache.key_builder import default_key_builder
+# NOTE: キャッシュ機能は使用していません
+# 理由: ユーザー個人の設定情報は即時性とセキュリティが重要なため
 
 care_settings_router = APIRouter(prefix="/api/care_settings", tags=["care_settings"])
 
@@ -70,19 +70,19 @@ async def create_care_setting(
         )
 
         return CareSettingCreateResponse(
-            id=care_setting.id,
-            user_id=care_setting.user_id,
-            parent_name=care_setting.parent_name,
-            child_name=care_setting.child_name,
-            dog_name=care_setting.dog_name,
-            care_start_date=care_setting.care_start_date.date(),
-            care_end_date=care_setting.care_end_date.date(),
-            morning_meal_time=care_setting.morning_meal_time.time(),
-            night_meal_time=care_setting.night_meal_time.time(),
-            walk_time=care_setting.walk_time.time(),
-            care_password=care_setting.care_password,
+            id=care_setting.id or 0,
+            user_id=care_setting.user_id or "",
+            parent_name=care_setting.parent_name or "",
+            child_name=care_setting.child_name or "",
+            dog_name=care_setting.dog_name or "",
+            care_start_date=care_setting.care_start_date.date() if care_setting.care_start_date else datetime.now().date(),
+            care_end_date=care_setting.care_end_date.date() if care_setting.care_end_date else datetime.now().date(),
+            morning_meal_time=care_setting.morning_meal_time.time() if care_setting.morning_meal_time else datetime.now().time(),
+            night_meal_time=care_setting.night_meal_time.time() if care_setting.night_meal_time else datetime.now().time(),
+            walk_time=care_setting.walk_time.time() if care_setting.walk_time else datetime.now().time(),
+            care_password=care_setting.care_password or "",
             care_clear_status=care_setting.care_clear_status,
-            created_at=care_setting.created_at,
+            created_at=care_setting.created_at or datetime.now(),
             updated_at=care_setting.updated_at,
         )
 
@@ -100,15 +100,25 @@ async def create_care_setting(
     response_model=CareSettingMeResponse,
     status_code=status.HTTP_200_OK,
 )
-@cache(expire=60, key_builder=default_key_builder)  # キャッシュ追加
+# NOTE: このエンドポイントにはキャッシュを適用しない
+# 理由：
+# 1. ユーザー個人の設定情報のためリアルタイムでの取得が重要
+# 2. 設定変更後すぐに最新情報が必要（feeding times, walk times等）
+# 3. セキュリティ上、個人情報のキャッシュは避ける
+# 4. care_logs作成時の基準となる重要な情報のため正確性が必須
 async def get_my_care_setting(firebase_uid: str = Depends(verify_firebase_token)):
     """
     ログインユーザーのケア設定取得API
+
+    このAPIは以下の重要な用途で使用されます：
+    - ダッシュボードでの設定表示
+    - care_logs作成時の基準情報
+    - 設定変更の即座反映が必要
+    - 個人情報のためキャッシュは使用しない
     """
-    print("🔥 /me：キャッシュ未使用時だけ表示される！")
 
     try:
-        print("✅ firebase_uid:", firebase_uid)
+        print(" firebase_uid:", firebase_uid)
         # Firebase UID からユーザー取得
         user = await prisma_client.users.find_unique(
             where={"firebase_uid": firebase_uid}
@@ -121,21 +131,21 @@ async def get_my_care_setting(firebase_uid: str = Depends(verify_firebase_token)
             where={"user_id": user.id}
         )
 
-        print("✅ care_setting:", care_setting)
+        print(" care_setting:", care_setting)
 
         if not care_setting:
             raise HTTPException(status_code=404, detail="Care setting not found")
 
         return CareSettingMeResponse(
-            id=care_setting.id,
-            parent_name=care_setting.parent_name,
-            child_name=care_setting.child_name,
-            dog_name=care_setting.dog_name,
-            care_start_date=care_setting.care_start_date.date(),
-            care_end_date=care_setting.care_end_date.date(),
-            morning_meal_time=care_setting.morning_meal_time.time(),
-            night_meal_time=care_setting.night_meal_time.time(),
-            walk_time=care_setting.walk_time.time(),
+            id=care_setting.id or 0,
+            parent_name=care_setting.parent_name or "",
+            child_name=care_setting.child_name or "",
+            dog_name=care_setting.dog_name or "",
+            care_start_date=care_setting.care_start_date.date() if care_setting.care_start_date else datetime.now().date(),
+            care_end_date=care_setting.care_end_date.date() if care_setting.care_end_date else datetime.now().date(),
+            morning_meal_time=care_setting.morning_meal_time.time() if care_setting.morning_meal_time else datetime.now().time(),
+            night_meal_time=care_setting.night_meal_time.time() if care_setting.night_meal_time else datetime.now().time(),
+            walk_time=care_setting.walk_time.time() if care_setting.walk_time else datetime.now().time(),
         )
 
     except HTTPException:

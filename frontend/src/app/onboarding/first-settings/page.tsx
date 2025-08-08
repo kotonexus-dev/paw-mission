@@ -26,11 +26,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAuth } from '@/context/AuthContext';
+// import { useAuth } from '@/context/AuthContext';
 
 export default function CareSettingsPage() {
   // DB：care_settingテーブルに対応
-  // あさごはん、夕ご飯、散歩時間など設定用
+  // あさごはん、ゆうご飯、散歩時間など設定用
   const router = useRouter();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -38,9 +38,9 @@ export default function CareSettingsPage() {
   const [eveningMealTime, setEveningMealTime] = useState('');
   const [walkTime, setWalkTime] = useState('');
   const [error, setError] = useState('');
-  const user = useAuth(); // 認証情報を取得
+  // const user = useAuth();
 
-  console.log('[CareSettingsPage] User:', user.currentUser);
+  // console.log('[CareSettingsPage] User:', user.currentUser);
 
   // 今日の日付（YYYY-MM-DD形式、最小日付用）
   // クライアント側でのみ日付を設定
@@ -54,7 +54,7 @@ export default function CareSettingsPage() {
     const jstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
     const todayJST = jstDate.toISOString().split('T')[0];
     setToday(todayJST);
-    console.log('[CareSettingsPage] JST今日の日付:', todayJST);
+    // console.log('[CareSettingsPage] JST今日の日付:', todayJST);
   }, []);
 
   // 指定した時間範囲で30分刻みの時間リストを生成する関数
@@ -110,7 +110,7 @@ export default function CareSettingsPage() {
     };
     localStorage.setItem('careSettings', JSON.stringify(careSettings));
     localStorage.setItem('lastCareTime', new Date().toISOString());
-    console.log('[CareSettingsPage] Saved care settings:', careSettings);
+    // console.log('[CareSettingsPage] Saved care settings:', careSettings);
 
     // 次の画面へ遷移
     router.push('/onboarding/admin-pin');

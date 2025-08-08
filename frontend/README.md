@@ -137,8 +137,7 @@ frontend/
 │   │   │   └── welcome/      # ウェルカム
 │   │   ├── reflection-writing/ # 反省文作成
 │   │   ├── walk/              # 散歩機能
-│   │   ├── welcome-back/      # お帰り画面
-│   │   └── sad-departure/     # 退場画面
+│   │   └── welcome-back/      # お帰り画面
 │   ├── components/            # 再利用可能コンポーネント
 │   │   ├── ui/               # UI コンポーネント
 │   │   │   ├── button.tsx    # ボタン

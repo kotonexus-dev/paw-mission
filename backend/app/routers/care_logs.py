@@ -2,6 +2,7 @@
 
 # 標準ライブラリ
 from datetime import datetime
+from typing import Any
 
 # サードパーティライブラリ
 from fastapi import APIRouter, HTTPException, status, Query, Depends
@@ -16,9 +17,8 @@ from app.schemas.care_logs import (
 )
 from app.dependencies import verify_firebase_token
 
-# キャッシュ導入によるデコレーターをインポート
-from fastapi_cache.decorator import cache
-from fastapi_cache.key_builder import default_key_builder
+# NOTE: キャッシュ機能は使用していません
+# 理由: お世話記録は即時性が重要で、リアルタイムでの正確な情報提供が必要なため
 
 care_logs_router = APIRouter(prefix="/api/care_logs", tags=["care_logs"])
 
@@ -40,12 +40,11 @@ async def update_care_log(
         print(f"[care_logs] PATCH受信: care_log_id={care_log_id}, request={request}")
 
         # care_log_id と firebase_uid が紐づくかチェック（不正なIDで他人のログ更新を防ぐ）
-        existing_log = await prisma_client.care_logs.find_first(
-            where={
-                "id": care_log_id,
-                "care_setting": {"user": {"firebase_uid": firebase_uid}},
-            }
-        )
+        where_clause: Any = {
+            "id": care_log_id,
+            "care_setting": {"user": {"firebase_uid": firebase_uid}},
+        }
+        existing_log = await prisma_client.care_logs.find_first(where=where_clause)
 
         if not existing_log:
             print(f"[care_logs] care_log not found or not authorized: {care_log_id}")
@@ -54,12 +53,15 @@ async def update_care_log(
         update_data = request.model_dump(exclude_unset=True)
         print(f"[care_logs] 更新データ: {update_data}")
 
+        # Type-safe update data
+        data_update: Any = update_data
+        where_update: Any = {"id": care_log_id}
         updated_log = await prisma_client.care_logs.update(
-            where={"id": care_log_id},
-            data=update_data,
+            where=where_update,
+            data=data_update,
         )
 
-        print(f"[care_logs] 更新成功: {updated_log.id}")
+        print(f"[care_logs] 更新成功: {updated_log.id if updated_log else 'Unknown'}")
         return updated_log
 
     except HTTPException:
@@ -96,15 +98,20 @@ async def create_care_log(
             raise HTTPException(status_code=401, detail="ユーザーが存在しません")
 
         # 対象ユーザーの care_setting を取得
+        where_clause_setting: Any = {"user_id": user.id}
         care_setting = await prisma_client.care_settings.find_first(
-            where={"user_id": user.id}
+            where=where_clause_setting
         )
         if not care_setting:
             raise HTTPException(status_code=404, detail="Care setting not found")
 
         # 同じ日付の記録がすでにあるかチェック
+        where_clause_existing: Any = {
+            "care_setting_id": care_setting.id,
+            "date": request.date,
+        }
         existing_log = await prisma_client.care_logs.find_first(
-            where={"care_setting_id": care_setting.id, "date": request.date}
+            where=where_clause_existing
         )
 
         if existing_log:
@@ -166,19 +173,22 @@ async def get_today_care_log(
         print(f"[care_logs] 検索日付: {date}")
 
         # care_setting_id が本人のものか確認
+        where_clause_auth: Any = {
+            "id": care_setting_id,
+            "user": {"firebase_uid": firebase_uid},
+        }
         care_setting = await prisma_client.care_settings.find_first(
-            where={"id": care_setting_id, "user": {"firebase_uid": firebase_uid}}
+            where=where_clause_auth
         )
         if not care_setting:
             raise HTTPException(status_code=403, detail="不正な care_setting_id です")
 
         # 今日の care_log を取得
-        care_log = await prisma_client.care_logs.find_first(
-            where={
-                "care_setting_id": care_setting_id,
-                "date": date,
-            }
-        )
+        where_clause_today: Any = {
+            "care_setting_id": care_setting_id,
+            "date": date,
+        }
+        care_log = await prisma_client.care_logs.find_first(where=where_clause_today)
 
         if not care_log:
             print("[care_logs] 今日の記録なし、デフォルト値で返却")
@@ -188,9 +198,11 @@ async def get_today_care_log(
                 fed_night=False,
                 walked=False,
             )
-        print(f"[care_logs] 今日の記録取得成功: {care_log.id}")
+        print(
+            f"[care_logs] 今日の記録取得成功: {care_log.id if care_log else 'Unknown'}"
+        )
         return CareLogTodayResponse(
-            care_log_id=care_log.id,
+            care_log_id=care_log.id if care_log else None,
             fed_morning=care_log.fed_morning or False,
             fed_night=care_log.fed_night or False,
             walked=care_log.walk_result or False,
@@ -212,7 +224,10 @@ async def get_today_care_log(
     response_model=CareLogTodayResponse,
     status_code=status.HTTP_200_OK,
 )
-@cache(expire=600, key_builder=default_key_builder)  # キャッシュ追加
+# NOTE: このエンドポイントにはキャッシュを適用しない
+# 理由: お世話記録の更新があった場合、すぐに最新の情報を取得する必要があるため
+# 特に散歩状態の確認は、ユーザーの行動判定（reflection-writing ページへのリダイレクト等）に
+# 直接影響するため、リアルタイムでの正確な情報が重要
 async def get_care_log_by_date(
     care_setting_id: int = Query(...),
     date: str = Query(...),
@@ -221,7 +236,6 @@ async def get_care_log_by_date(
     """
     指定日付文字列（例: "2025-07-01"）のお世話記録を取得するAPI
     """
-    print("🔥 /by_date：キャッシュ未使用時だけ表示される！")
 
     try:
         print(
@@ -231,19 +245,22 @@ async def get_care_log_by_date(
         print(f"[care_logs] 検索日付: {date}")
 
         # care_setting_id が本人のものか確認
+        where_clause_auth_by_date: Any = {
+            "id": care_setting_id,
+            "user": {"firebase_uid": firebase_uid},
+        }
         care_setting = await prisma_client.care_settings.find_first(
-            where={"id": care_setting_id, "user": {"firebase_uid": firebase_uid}}
+            where=where_clause_auth_by_date
         )
         if not care_setting:
             raise HTTPException(status_code=403, detail="不正な care_setting_id です")
 
         # 該当日の care_log を取得
-        care_log = await prisma_client.care_logs.find_first(
-            where={
-                "care_setting_id": care_setting_id,
-                "date": date,
-            }
-        )
+        where_clause_by_date: Any = {
+            "care_setting_id": care_setting_id,
+            "date": date,
+        }
+        care_log = await prisma_client.care_logs.find_first(where=where_clause_by_date)
 
         if not care_log:
             return CareLogTodayResponse(
@@ -254,7 +271,7 @@ async def get_care_log_by_date(
             )
 
         return CareLogTodayResponse(
-            care_log_id=care_log.id,
+            care_log_id=care_log.id if care_log else None,
             fed_morning=care_log.fed_morning or False,
             fed_night=care_log.fed_night or False,
             walked=care_log.walk_result or False,
@@ -274,29 +291,39 @@ async def get_care_log_by_date(
     "/list",
     status_code=status.HTTP_200_OK,
 )
-@cache(expire=60, key_builder=default_key_builder)  # 60秒（1分）キャッシュ
+# NOTE: このエンドポイントにはキャッシュを適用しない
+# 理由: 管理者画面（admin/reflections）で反省文機能に使用される際、
+# ダッシュボードで新規作成されたlogsをリアルタイムで取得する必要があるため
+# キャッシュがあると最新のcare_logs情報が反映されず、反省文の判定に影響する
 async def get_care_logs_list(
     care_setting_id: int = Query(...),
     firebase_uid: str = Depends(verify_firebase_token),
 ):
     """
     特定care_setting_idの全care_logsを取得するAPI
+
+    主な用途：
+    - 管理者画面での反省文機能（admin/reflections）
     """
-    print("🔥 /list：キャッシュ未使用時だけ表示される！")
 
     try:
         print(f"[care_logs] GET list受信: care_setting_id={care_setting_id}")
 
         # care_setting_id が本人のものか確認
+        where_clause_auth_list: Any = {
+            "id": care_setting_id,
+            "user": {"firebase_uid": firebase_uid},
+        }
         care_setting = await prisma_client.care_settings.find_first(
-            where={"id": care_setting_id, "user": {"firebase_uid": firebase_uid}}
+            where=where_clause_auth_list
         )
         if not care_setting:
             raise HTTPException(status_code=403, detail="不正な care_setting_id です")
 
         # 全care_logsを取得
+        where_clause_list: Any = {"care_setting_id": care_setting_id}
         care_logs = await prisma_client.care_logs.find_many(
-            where={"care_setting_id": care_setting_id},
+            where=where_clause_list,
             order={"date": "asc"},
         )
 
@@ -305,14 +332,15 @@ async def get_care_logs_list(
         # 必要な情報のみ返却
         result = []
         for log in care_logs:
-            result.append(
-                {
-                    "id": log.id,
-                    "date": log.date,
-                    "walk_result": log.walk_result,
-                    "care_setting_id": log.care_setting_id,
-                }
-            )
+            if log and log.id is not None:  # Type safety check
+                result.append(
+                    {
+                        "id": log.id,
+                        "date": log.date,
+                        "walk_result": log.walk_result,
+                        "care_setting_id": log.care_setting_id,
+                    }
+                )
 
         return {"care_logs": result}
 

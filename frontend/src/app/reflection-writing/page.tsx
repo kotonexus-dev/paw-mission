@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import createReflectionNote from '@/hooks/reflectionNotesPost';
-import { useAuth } from '@/context/AuthContext';
+// import { useAuth } from '@/context/AuthContext';
 import {
   Dialog,
   DialogContent,
@@ -23,9 +23,9 @@ export default function ReflectionWritingPage() {
   const [title, setTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const user = useAuth(); // 認証情報を取得
+  // const user = useAuth();
 
-  console.log('[ReflectionWritingPage] User:', user.currentUser);
+  // console.log('[ReflectionWritingPage] User:', user.currentUser);
 
   const handleSubmit = async () => {
     if (reflection.trim() && title.trim()) {
@@ -43,7 +43,7 @@ export default function ReflectionWritingPage() {
         setShowSuccessDialog(true);
       } catch (error) {
         alert('保存に失敗しました。ネットワークを確認してください。');
-        console.error(error);
+        // console.error(error);
       } finally {
         setIsSubmitting(false);
       }
@@ -59,19 +59,6 @@ export default function ReflectionWritingPage() {
   return (
     <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-cyan-50 px-6 py-12 [&_*]:text-[18px]">
       <div className="w-full max-w-xs mx-auto">
-        {/* ヘッダー */}
-        {/*
-        <div className="flex items-center mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mr-2 p-2"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </div>
-        */}
-
         {/* メインコンテンツ */}
         <div className="flex flex-col items-center space-y-8">
           {/* タイトル */}
@@ -123,17 +110,7 @@ export default function ReflectionWritingPage() {
               />
             </div>
           </div>
-          {/* 犬のシルエット */}
-          {/* <div className="w-40 h-40 flex items-center justify-center">
-            <Image
-              src="/images/sad-dog-silhouette.png"
-              alt="悲しそうな犬のシルエット"
-              width={160}
-              height={160}
-              style={{ objectFit: 'contain' }}
-              priority
-            />
-          </div> */}
+          {/* アニメーション */}
           <div className="w-full max-w-xs space-y-4 bg-white p-4 border-gray-500 shadow-sm rounded-2xl border-3">
             {/* <div className="w-60 h-60 flex items-center justify-center"> */}
             <video

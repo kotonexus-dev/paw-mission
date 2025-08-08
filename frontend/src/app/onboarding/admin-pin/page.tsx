@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { auth } from '@/lib/firebase/config';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,7 +16,7 @@ import { ArrowLeft, Shield, Eye, EyeOff, Lock } from 'lucide-react'; // lucide-r
 import { useAuth } from '@/context/AuthContext';
 
 export default function AdminPinPage() {
-  // DB：care_settingのcare_passwordに対応
+  // DB：care_settingのcare_password(pin)に対応
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
   const [adminPin, setAdminPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
@@ -26,9 +25,9 @@ export default function AdminPinPage() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false); // 送信中状態
   const [isSuccess, setIsSuccess] = useState(false); // 成功状態
-  const user = useAuth(); // 認証情報を取得
+  const { currentUser } = useAuth();
 
-  console.log('[AdminPinPage] User:', user.currentUser);
+  // console.log('[AdminPinPage] User:', currentUser);
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -47,8 +46,8 @@ export default function AdminPinPage() {
       const familyInfo = JSON.parse(familyInfoStr);
       const careSettings = JSON.parse(careSettingsStr);
 
-      console.log('[Step4] familyInfo:', familyInfo);
-      console.log('[Step4] careSettings:', careSettings);
+      // console.log('[Step4] familyInfo:', familyInfo);
+      // console.log('[Step4] careSettings:', careSettings);
 
       const { parentName, childName, dogName } = familyInfo;
 
@@ -75,7 +74,7 @@ export default function AdminPinPage() {
         }
 
         // その他の形式の場合はデフォルト値
-        console.warn('[Step4] 不正な時間形式:', timeStr);
+        // console.warn('[Step4] 不正な時間形式:', timeStr);
         return '00:00';
       };
 
@@ -84,7 +83,7 @@ export default function AdminPinPage() {
         if (!dateStr) return '';
 
         // 日付文字列をそのまま使用（ユーザーが選択した日付は日本時間の日付として扱う）
-        console.log('[Step4] JST基準日付:', dateStr);
+        // console.log('[Step4] JST基準日付:', dateStr);
         return dateStr;
       };
 
@@ -97,19 +96,19 @@ export default function AdminPinPage() {
       const formattedStartDate = formatDateForJST(careStartDate);
       const formattedEndDate = formatDateForJST(careEndDate);
 
-      console.log('[Step4] 時間データ変換:', {
-        original: { morningMealTime, nightMealTime, walkTime },
-        formatted: {
-          formattedMorningTime,
-          formattedNightTime,
-          formattedWalkTime,
-        },
-      });
+      // console.log('[Step4] 時間データ変換:', {
+      //   original: { morningMealTime, nightMealTime, walkTime },
+      //   formatted: {
+      //     formattedMorningTime,
+      //     formattedNightTime,
+      //     formattedWalkTime,
+      //   },
+      // });
 
-      console.log('[Step4] 日期データ変換:', {
-        original: { careStartDate, careEndDate },
-        formatted: { formattedStartDate, formattedEndDate },
-      });
+      // console.log('[Step4] 日期データ変換:', {
+      //   original: { careStartDate, careEndDate },
+      //   formatted: { formattedStartDate, formattedEndDate },
+      // });
 
       // 送信するデータの詳細ログ
       const requestData = {
@@ -124,7 +123,7 @@ export default function AdminPinPage() {
         walk_time: formattedWalkTime,
         care_clear_status: 'ongoing',
       };
-      console.log('[Step4] 送信データ:', requestData);
+      // console.log('[Step4] 送信データ:', requestData);
 
       // バリデーション
       if (!parentName || !childName || !dogName) {
@@ -163,11 +162,12 @@ export default function AdminPinPage() {
         return;
       }
 
-      const token = await auth.currentUser?.getIdToken();
-      if (!token) {
+      if (!currentUser) {
         setError('認証情報が取得できません');
         return;
       }
+
+      const token = await currentUser.getIdToken();
 
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -183,18 +183,18 @@ export default function AdminPinPage() {
       let data = null;
       try {
         data = await res.json();
-        console.log('[Step4] API レスポンス:', data);
+        // console.log('[Step4] API レスポンス:', data);
       } catch (e) {
-        console.error('[Step4] JSONパースエラー:', e);
+        // console.error('[Step4] JSONパースエラー:', e);
         data = null;
       }
 
       if (!res.ok) {
-        console.error('[Step4] API エラー:', {
-          status: res.status,
-          statusText: res.statusText,
-          data,
-        });
+        // console.error('[Step4] API エラー:', {
+        //   status: res.status,
+        //   statusText: res.statusText,
+        //   data,
+        // });
 
         let errorMessage = 'サーバーエラーが発生しました';
 
@@ -243,7 +243,7 @@ export default function AdminPinPage() {
         router.push('/loading-screen');
       }, 2000);
     } catch (err: any) {
-      console.error('登録失敗:', err);
+      // console.error('登録失敗:', err);
       setError(err.message || '登録中にエラーが発生しました');
     } finally {
       setIsSubmitting(false);

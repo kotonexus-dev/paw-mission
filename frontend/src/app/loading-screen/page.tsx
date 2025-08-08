@@ -8,9 +8,9 @@ import { useAuth } from '@/context/AuthContext';
 export default function LoadingScreen() {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
-  const user = useAuth(); // 認証情報を取得
+  const user = useAuth();
 
-  console.log('[LoadingScreen] User:', user.currentUser);
+  // console.log('[LoadingScreen] User:', user.currentUser);
 
   useEffect(() => {
     // ローディングの進行状況を更新
