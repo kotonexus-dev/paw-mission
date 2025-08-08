@@ -83,10 +83,11 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Prisma generate
+      - name: Run Prisma generate and setup database
         run: |
           source venv/bin/activate
           prisma generate
+          prisma db push --force-reset
 
       - name: Run Black (code formatting check)
         run: |
