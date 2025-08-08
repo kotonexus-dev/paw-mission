@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { /* Calendar, */ Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
@@ -36,9 +36,10 @@ export default function ReflectionsPage() {
     title: '',
     description: '',
   }); // ダイアログ内容
-  const user = useAuth(); // 認証情報を取得
+  const [error, setError] = useState(''); // エラーメッセージ表示用
+  const user = useAuth();
 
-  console.log('[ReflectionsPage] User:', user.currentUser);
+  // console.log('[ReflectionsPage] User:', user.currentUser);
 
   // Firebase認証ヘッダーを取得する関数
   const getAuthHeaders = useCallback(async (): Promise<
@@ -52,8 +53,8 @@ export default function ReflectionsPage() {
         Authorization: `Bearer ${idToken}`,
         'Content-Type': 'application/json',
       };
-    } catch (error) {
-      console.error('IDトークンの取得に失敗しました:', error);
+    } catch (err) {
+      // console.error('IDトークンの取得に失敗しました:', err);
       return {};
     }
   }, [user.currentUser]);
@@ -84,7 +85,7 @@ export default function ReflectionsPage() {
         // データが配列でない場合は空配列を設定
         setReflectionData(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error('反省文の取得に失敗しました', err);
+        // console.error('反省文の取得に失敗しました', err);
         setReflectionData([]); // エラー時は空配列を設定
       } finally {
         setIsLoading(false);
@@ -97,13 +98,14 @@ export default function ReflectionsPage() {
   // お世話再チャレンジ承認ハンドラー
   const handleApproveRechallenge = async () => {
     setIsApproving(true);
+    setError(''); // エラーをリセット
     try {
       const headers = await getAuthHeaders();
 
-      console.log('=== お世話再チャレンジ承認処理開始 ===');
+      // console.log('=== お世話再チャレンジ承認処理開始 ===');
 
       // Step 1: care_settingsを取得して日付範囲を確認
-      console.log('Step 1: care_settings取得中...');
+      // console.log('Step 1: care_settings取得中...');
       const settingsRes = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/care_settings/me`,
         {
@@ -116,7 +118,7 @@ export default function ReflectionsPage() {
       }
 
       const settingsData = await settingsRes.json();
-      console.log('Care settings:', settingsData);
+      // console.log('Care settings:', settingsData);
 
       if (
         !settingsData ||
@@ -130,12 +132,12 @@ export default function ReflectionsPage() {
       const startDate = new Date(settingsData.care_start_date);
       const endDate = new Date(settingsData.care_end_date);
 
-      console.log(
-        `日付範囲: ${startDate.toISOString().split('T')[0]} ~ ${endDate.toISOString().split('T')[0]}`
-      );
+      // console.log(
+      //   `日付範囲: ${startDate.toISOString().split('T')[0]} ~ ${endDate.toISOString().split('T')[0]}`
+      // );
 
       // Step 2: 全care_logsを取得
-      console.log('Step 2: care_logs一覧取得中...');
+      // console.log('Step 2: care_logs一覧取得中...');
       const careLogsRes = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/care_logs/list?care_setting_id=${careSettingId}`,
         {
@@ -148,10 +150,10 @@ export default function ReflectionsPage() {
       }
 
       const careLogsData = await careLogsRes.json();
-      console.log('全care_logs:', careLogsData);
+      // console.log('全care_logs:', careLogsData);
 
       // Step 3: 日付範囲内のcare_logsをフィルタリング（昨日まで）
-      console.log('Step 3: 日付範囲内care_logsフィルタリング中...');
+      // console.log('Step 3: 日付範囲内care_logsフィルタリング中...');
 
       // 昨日の日付を取得（今日の記錄は更新しない）- JST時間で計算
       const currentday = new Date();
@@ -168,35 +170,43 @@ export default function ReflectionsPage() {
       );
       const actualEndDate = yesterdayJst < endDate ? yesterdayJst : endDate;
 
-      console.log(
-        `実際の終了日: ${actualEndDate.toISOString().split('T')[0]} (今日は除外、JST基準)`
-      );
+      // console.log(
+      //   `実際の終了日: ${actualEndDate.toISOString().split('T')[0]} (今日は除外、JST基準)`
+      // );
 
-      const targetCareLogs = careLogsData.care_logs.filter((log: any) => {
+      const targetCareLogs = careLogsData.care_logs.filter((log: {
+        id: number;
+        date: string;
+        care_setting_id: number;
+      }) => {
         const logDate = new Date(log.date);
         const isInRange = logDate >= startDate && logDate <= actualEndDate;
 
-        console.log(
-          `ログ日付: ${log.date}, 開始日以降: ${logDate >= startDate}, 終了日以前: ${logDate <= actualEndDate}, 対象: ${isInRange}`
-        );
+        // console.log(
+        //   `ログ日付: ${log.date}, 開始日以降: ${logDate >= startDate}, 終了日以前: ${logDate <= actualEndDate}, 対象: ${isInRange}`
+        // );
 
         return isInRange;
       });
 
-      console.log(`対象care_logs数: ${targetCareLogs.length}`);
-      console.log('対象care_logs:', targetCareLogs);
+      // console.log(`対象care_logs数: ${targetCareLogs.length}`);
+      // console.log('対象care_logs:', targetCareLogs);
 
       if (targetCareLogs.length === 0) {
-        console.log('対象期間内にcare_logsが見つかりません');
-        alert('対象期間内にお世話記録が見つかりません');
+        // console.log('対象期間内にcare_logsが見つかりません');
+        setError('対象期間内にお世話記録が見つかりません');
         return;
       }
 
       // Step 4: 各care_logの walk_result を true に更新（並列処理）
-      console.log('Step 4: care_logs個別更新中...');
+      // console.log('Step 4: care_logs個別更新中...');
 
-      const updatePromises = targetCareLogs.map(async (log: any) => {
-        console.log(`更新中: care_log_id=${log.id}, date=${log.date}`);
+      const updatePromises = targetCareLogs.map(async (log: {
+        id: number;
+        date: string;
+        care_setting_id: number;
+      }) => {
+        // console.log(`更新中: care_log_id=${log.id}, date=${log.date}`);
 
         const updateRes = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/care_logs/${log.id}`,
@@ -214,20 +224,18 @@ export default function ReflectionsPage() {
         }
 
         const updatedLog = await updateRes.json();
-        console.log(`更新成功: care_log_id=${log.id}`, updatedLog);
+        // console.log(`更新成功: care_log_id=${log.id}`, updatedLog);
         return updatedLog;
       });
 
-      const updatedLogs = await Promise.all(updatePromises);
-      const updatedCount = updatedLogs.length;
-
-      console.log(`Care logs更新完了: ${updatedCount}件更新`);
+      await Promise.all(updatePromises);
+      // console.log(`Care logs更新完了: ${updatePromises.length}件更新`);
 
       // Step 5: reflection_notesの個別承認
-      console.log('Step 5: reflection_notes個別承認中...');
+      // console.log('Step 5: reflection_notes個別承認中...');
 
       // 全ての反省文を取得
-      console.log('反省文取得開始...');
+      // console.log('反省文取得開始...');
       const allReflectionRes = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/reflection_notes`,
         {
@@ -236,74 +244,67 @@ export default function ReflectionsPage() {
         }
       );
 
-      console.log(
-        '反省文取得レスポンス:',
-        allReflectionRes.status,
-        allReflectionRes.statusText
-      );
+      // console.log(
+      //   '反省文取得レスポンス:',
+      //   allReflectionRes.status,
+      //   allReflectionRes.statusText
+      // );
 
       if (!allReflectionRes.ok) {
         throw new Error(`反省文取得失敗: ${allReflectionRes.status}`);
       }
 
-      console.log('反省文レスポンスボディ読み取り開始...');
+      // console.log('反省文レスポンスボディ読み取り開始...');
       const allReflectionNotes = await allReflectionRes.json();
-      console.log('全反省文:', allReflectionNotes);
+      // console.log('全反省文:', allReflectionNotes);
 
       // 未承認の反省文を特定
       const unapprovedNotes = allReflectionNotes.filter(
-        (note: any) => !note.approved_by_parent
+        (note: ReflectionNote) => !note.approved_by_parent
       );
-      console.log(`未承認の反省文数: ${unapprovedNotes.length}`);
+      // console.log(`未承認の反省文数: ${unapprovedNotes.length}`);
 
       // 各反省文を個別に承認（並列処理）
-      const approvePromises = unapprovedNotes.map(async (note: any) => {
-        console.log(`承認中: reflection_note_id=${note.id}`);
+      const approvePromises = unapprovedNotes.map(async (note: ReflectionNote) => {
+        // console.log(`承認中: reflection_note_id=${note.id}`);
 
-        try {
-          const approveRes = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/reflection_notes/${note.id}`,
-            {
-              method: 'PATCH',
-              headers: {
-                ...headers,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                approved_by_parent: true,
-              }),
-            }
-          );
-
-          console.log(
-            `承認レスポンス (ID:${note.id}):`,
-            approveRes.status,
-            approveRes.statusText
-          );
-
-          if (!approveRes.ok) {
-            throw new Error(`反省文承認失敗: ${approveRes.status}`);
+        const approveRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/reflection_notes/${note.id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              ...headers,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              approved_by_parent: true,
+            }),
           }
+        );
 
-          console.log(`承認レスポンスボディ読み取り開始 (ID:${note.id})...`);
-          const approvedNote = await approveRes.json();
-          console.log(`承認成功: reflection_note_id=${note.id}`, approvedNote);
-          return approvedNote;
-        } catch (error) {
-          console.error(`個別承認エラー (ID:${note.id}):`, error);
-          throw error;
+        // console.log(
+        //   `承認レスポンス (ID:${note.id}):`,
+        //   approveRes.status,
+        //   approveRes.statusText
+        // );
+
+        if (!approveRes.ok) {
+          throw new Error(`反省文承認失敗: ${approveRes.status}`);
         }
+
+        // console.log(`承認レスポンスボディ読み取り開始 (ID:${note.id})...`);
+        const approvedNote = await approveRes.json();
+        // console.log(`承認成功: reflection_note_id=${note.id}`, approvedNote);
+        return approvedNote;
       });
 
-      const approvedNotes = await Promise.all(approvePromises);
-      const approvedCount = approvedNotes.length;
-
-      console.log(`反省文承認完了: ${approvedCount}件承認`);
+      await Promise.all(approvePromises);
+      // console.log(`反省文承認完了: ${approvePromises.length}件承認`);
 
       // 成功メッセージ
-      console.log('=== 承認処理完了 ===');
-      console.log(`Care logs更新數: ${updatedCount}`);
-      console.log(`反省文更新數: ${approvedCount}`);
+      // console.log('=== 承認処理完了 ===');
+      // console.log(`Care logs更新數: ${updatePromises.length}`);
+      // console.log(`反省文更新數: ${approvePromises.length}`);
 
       // 成功後にダイアログを表示
       setDialogContent({
@@ -312,11 +313,11 @@ export default function ReflectionsPage() {
       });
 
       setShowDialog(true);
-    } catch (error) {
-      console.error('承認処理に失敗しました:', error);
+    } catch (err) {
+      // console.error('承認処理に失敗しました:', err);
       const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      alert(`承認処理に失敗しました: ${errorMessage}`);
+        err instanceof Error ? err.message : String(err);
+      setError(`承認処理に失敗しました: ${errorMessage}`);
     } finally {
       setIsApproving(false);
     }
@@ -441,6 +442,22 @@ export default function ReflectionsPage() {
             </Card>
           </TabsContent> */}
         </Tabs>
+
+        {/* エラーメッセージ表示 */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
+            <p className="text-sm text-red-600 text-center">{error}</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full mt-2 text-red-600 hover:text-red-700"
+              onClick={() => setError('')}
+            >
+              閉じる
+            </Button>
+          </div>
+        )}
+
         <Button
           className={`w-full mt-6 ${
             isApproving

@@ -91,32 +91,32 @@ export class GPSTracker {
   // Geolocationサポートチェック
   private checkGeolocationSupport(): boolean {
     if (!navigator.geolocation) {
-      console.error('[GPSTracker] Geolocationがサポートされていません');
+      // console.error('[GPSTracker] Geolocationがサポートされていません');
       if (this.onError) {
         this.onError('お使いのブラウザはGPS機能をサポートしていません');
       }
       return false;
     }
-    console.log('[GPSTracker] Geolocationサポート確認済み');
+    // console.log('[GPSTracker] Geolocationサポート確認済み');
     return true;
   }
 
   // 位置情報更新コールバック設定
   public setPositionCallback(callback: (position: GPSPosition) => void): void {
     this.onPositionUpdate = callback;
-    console.log('[GPSTracker] 位置情報更新コールバック設定完了');
+    // console.log('[GPSTracker] 位置情報更新コールバック設定完了');
   }
 
   // 距離更新コールバック設定
   public setDistanceCallback(callback: (distance: number) => void): void {
     this.onDistanceUpdate = callback;
-    console.log('[GPSTracker] 距離更新コールバック設定完了');
+    // console.log('[GPSTracker] 距離更新コールバック設定完了');
   }
 
   // エラーコールバック設定
   public setErrorCallback(callback: (error: string) => void): void {
     this.onError = callback;
-    console.log('[GPSTracker] エラーコールバック設定完了');
+    // console.log('[GPSTracker] エラーコールバック設定完了');
   }
 
   // 位置履歴の管理
@@ -161,9 +161,9 @@ export class GPSTracker {
     // 連続で小さな移動が続く場合、しきい値を下げる
     if (this.consecutiveSmallMoves > 3) {
       baseThreshold = Math.max(baseThreshold * 0.6, 2);
-      console.log(
-        `[GPSTracker] 連続移動検出: しきい値を${baseThreshold.toFixed(1)}mに下げる`
-      );
+      // console.log(
+      //   `[GPSTracker] 連続移動検出: しきい値を${baseThreshold.toFixed(1)}mに下げる`
+      // );
     }
 
     return Math.min(baseThreshold, 10); // 最大10m
@@ -177,29 +177,29 @@ export class GPSTracker {
         this.currentPosition.timestamp - this.previousPosition.timestamp;
       const timeIntervalSeconds = timeInterval / 1000;
 
-      console.log('[GPSTracker] 経路距離計算開始', {
-        previous: {
-          lat: this.previousPosition.latitude,
-          lng: this.previousPosition.longitude,
-          accuracy: this.previousPosition.accuracy,
-          time: new Date(this.previousPosition.timestamp).toLocaleTimeString(),
-        },
-        current: {
-          lat: this.currentPosition.latitude,
-          lng: this.currentPosition.longitude,
-          accuracy: this.currentPosition.accuracy,
-          time: new Date(this.currentPosition.timestamp).toLocaleTimeString(),
-        },
-        timeInterval: `${timeIntervalSeconds.toFixed(1)}秒`,
-        accumulated: `${this.accumulatedDistance.toFixed(1)}m`,
-      });
+      // console.log('[GPSTracker] 経路距離計算開始', {
+      //   previous: {
+      //     lat: this.previousPosition.latitude,
+      //     lng: this.previousPosition.longitude,
+      //     accuracy: this.previousPosition.accuracy,
+      //     time: new Date(this.previousPosition.timestamp).toLocaleTimeString(),
+      //   },
+      //   current: {
+      //     lat: this.currentPosition.latitude,
+      //     lng: this.currentPosition.longitude,
+      //     accuracy: this.currentPosition.accuracy,
+      //     time: new Date(this.currentPosition.timestamp).toLocaleTimeString(),
+      //   },
+      //   timeInterval: `${timeIntervalSeconds.toFixed(1)}秒`,
+      //   accumulated: `${this.accumulatedDistance.toFixed(1)}m`,
+      // });
 
       // 精度50m超はノイズとみなして無視（cl改善版）
       if (this.currentPosition.accuracy > 50) {
-        console.log(
-          '[GPSTracker] 精度が低すぎるためスキップ',
-          `${this.currentPosition.accuracy.toFixed(1)}m > 50m`
-        );
+        // console.log(
+        //   '[GPSTracker] 精度が低すぎるためスキップ',
+        //   `${this.currentPosition.accuracy.toFixed(1)}m > 50m`
+        // );
         return;
       }
 
@@ -218,21 +218,21 @@ export class GPSTracker {
       const speed =
         timeIntervalSeconds > 0 ? (distance / timeIntervalSeconds) * 3.6 : 0; // km/h
 
-      console.log('[GPSTracker] 経路距離計算結果', {
-        distance: `${distance.toFixed(2)}m`,
-        threshold: `${dynamicThreshold.toFixed(2)}m`,
-        accuracy: `${this.currentPosition.accuracy.toFixed(1)}m`,
-        speed: `${speed.toFixed(1)}km/h`,
-        accumulated: `${this.accumulatedDistance.toFixed(1)}m`,
-        currentTotal: `${this.totalDistance.toFixed(2)}m`,
-      });
+      // console.log('[GPSTracker] 経路距離計算結果', {
+      //   distance: `${distance.toFixed(2)}m`,
+      //   threshold: `${dynamicThreshold.toFixed(2)}m`,
+      //   accuracy: `${this.currentPosition.accuracy.toFixed(1)}m`,
+      //   speed: `${speed.toFixed(1)}km/h`,
+      //   accumulated: `${this.accumulatedDistance.toFixed(1)}m`,
+      //   currentTotal: `${this.totalDistance.toFixed(2)}m`,
+      // });
 
       // 異常に高速な移動（25km/h以上）は除外（cl改善版）
       if (speed > 25) {
-        console.log(
-          '[GPSTracker] 異常に高速な移動のためスキップ',
-          `${speed.toFixed(1)}km/h > 25km/h`
-        );
+        // console.log(
+        //   '[GPSTracker] 異常に高速な移動のためスキップ',
+        //   `${speed.toFixed(1)}km/h > 25km/h`
+        // );
         return;
       }
 
@@ -243,10 +243,10 @@ export class GPSTracker {
         this.accumulatedDistance = 0;
         this.consecutiveSmallMoves = 0;
 
-        console.log('[GPSTracker] 直接追加', {
-          addedDistance: `${distance.toFixed(2)}m`,
-          totalDistance: `${this.totalDistance.toFixed(2)}m`,
-        });
+        // console.log('[GPSTracker] 直接追加', {
+        //   addedDistance: `${distance.toFixed(2)}m`,
+        //   totalDistance: `${this.totalDistance.toFixed(2)}m`,
+        // });
 
         this.lastRecordedPosition = { ...this.currentPosition };
 
@@ -258,21 +258,21 @@ export class GPSTracker {
         this.accumulatedDistance += distance;
         this.consecutiveSmallMoves += 1;
 
-        console.log('[GPSTracker] 累積中', {
-          addedDistance: `${distance.toFixed(2)}m`,
-          accumulatedDistance: `${this.accumulatedDistance.toFixed(2)}m`,
-          consecutiveSmallMoves: this.consecutiveSmallMoves,
-        });
+        // console.log('[GPSTracker] 累積中', {
+        //   addedDistance: `${distance.toFixed(2)}m`,
+        //   accumulatedDistance: `${this.accumulatedDistance.toFixed(2)}m`,
+        //   consecutiveSmallMoves: this.consecutiveSmallMoves,
+        // });
 
         // 累積距離が5m以上になった場合
         if (this.accumulatedDistance >= 5) {
           // 時間窓チェックで真の移動か確認
           if (this.checkTimeWindowMovement()) {
             this.totalDistance += this.accumulatedDistance;
-            console.log('[GPSTracker] 累積追加', {
-              addedDistance: `${this.accumulatedDistance.toFixed(2)}m`,
-              totalDistance: `${this.totalDistance.toFixed(2)}m`,
-            });
+            // console.log('[GPSTracker] 累積追加', {
+            //   addedDistance: `${this.accumulatedDistance.toFixed(2)}m`,
+            //   totalDistance: `${this.totalDistance.toFixed(2)}m`,
+            // });
 
             this.accumulatedDistance = 0;
             this.consecutiveSmallMoves = 0;
@@ -282,35 +282,35 @@ export class GPSTracker {
               this.onDistanceUpdate(this.totalDistance);
             }
           } else {
-            console.log('[GPSTracker] 時間窓チェック失敗: GPS漂移の可能性');
-            this.accumulatedDistance = 0;
-            this.consecutiveSmallMoves = 0;
+            // console.log('[GPSTracker] 時間窓チェック失敗: GPS漂移の可能性');
+            // this.accumulatedDistance = 0;
+            // this.consecutiveSmallMoves = 0;
           }
         }
       } else {
         // 非常に小さな移動：GPS誤差の可能性
-        console.log('[GPSTracker] 微小移動無視', {
-          distance: `${distance.toFixed(2)}m`,
-          reason: '< 1m',
-        });
+        // console.log('[GPSTracker] 微小移動無視', {
+        //   distance: `${distance.toFixed(2)}m`,
+        //   reason: '< 1m',
+        // });
         this.consecutiveSmallMoves = Math.max(
           0,
           this.consecutiveSmallMoves - 1
         );
       }
     } else if (!this.previousPosition) {
-      console.log('[GPSTracker] 初回位置設定、距離計算はスキップ');
+      // console.log('[GPSTracker] 初回位置設定、距離計算はスキップ');
       this.lastRecordedPosition = this.currentPosition
         ? { ...this.currentPosition }
         : null;
     } else {
-      console.log('[GPSTracker] 現在位置が取得できていません');
+      // console.log('[GPSTracker] 現在位置が取得できていません');
     }
   }
 
   // 定時更新方式：タイマーを使用してgetCurrentPositionを定期実行（cl改善版）
   private startTimerUpdate(): void {
-    console.log('[GPSTracker] 定時更新方式開始：タイマーによるGPS取得');
+    // console.log('[GPSTracker] 定時更新方式開始：タイマーによるGPS取得');
     this.usingTimerUpdate = true;
 
     const options: PositionOptions = {
@@ -321,15 +321,15 @@ export class GPSTracker {
 
     // 30秒間隔で位置情報を取得
     this.updateTimerId = setInterval(() => {
-      console.log('[GPSTracker] 定時更新方式：getCurrentPosition実行中...');
+      // console.log('[GPSTracker] 定時更新方式：getCurrentPosition実行中...');
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log('[GPSTracker] 定時更新方式：位置情報取得成功', {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-          });
+          // console.log('[GPSTracker] 定時更新方式：位置情報取得成功', {
+          //   lat: position.coords.latitude,
+          //   lng: position.coords.longitude,
+          //   accuracy: position.coords.accuracy,
+          // });
 
           // 前回位置を保存
           this.previousPosition = this.currentPosition;
@@ -352,20 +352,20 @@ export class GPSTracker {
           this.calculatePathDistance();
         },
         (error) => {
-          console.error('[GPSTracker] 定時更新方式：位置情報取得エラー', {
-            code: error.code,
-            message: error.message,
-          });
+          // console.error('[GPSTracker] 定時更新方式：位置情報取得エラー', {
+          //   code: error.code,
+          //   message: error.message,
+          // });
 
           // 長時間運行でのエラーハンドリング改善
           if (error.code === error.TIMEOUT) {
-            console.log('[GPSTracker] GPS取得タイムアウト - 継続監視中');
+            // console.log('[GPSTracker] GPS取得タイムアウト - 継続監視中');
             // タイムアウトの場合は継続（一時的な問題の可能性）
           } else if (error.code === error.POSITION_UNAVAILABLE) {
-            console.log('[GPSTracker] GPS利用不可 - 位置サービス確認推奨');
+            // console.log('[GPSTracker] GPS利用不可 - 位置サービス確認推奨');
             // 利用不可の場合も継続（環境変化の可能性）
           } else {
-            console.error('[GPSTracker] 予期しないGPSエラー:', error);
+            // console.error('[GPSTracker] 予期しないGPSエラー:', error);
           }
 
           // エラーがあってもGPS追跡は継続
@@ -384,7 +384,7 @@ export class GPSTracker {
         return;
       }
 
-      console.log('[GPSTracker] GPS追跡開始（cl改善版）');
+      // console.log('[GPSTracker] GPS追跡開始（cl改善版）');
 
       // cl改善版の変数をリセット
       this.accumulatedDistance = 0;
@@ -408,19 +408,19 @@ export class GPSTracker {
       maximumAge: highAccuracy ? 0 : 300000, // 低精度の場合は5分間のキャッシュを許可
     };
 
-    console.log(
-      `[GPSTracker] 位置取得試行: ${highAccuracy ? '高精度' : '低精度'}モード`,
-      options
-    );
+    // console.log(
+    //   `[GPSTracker] 位置取得試行: ${highAccuracy ? '高精度' : '低精度'}モード`,
+    //   options
+    // );
 
     // 現在位置を取得
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        console.log('[GPSTracker] 初期位置取得成功', {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-        });
+        // console.log('[GPSTracker] 初期位置取得成功', {
+        //   lat: position.coords.latitude,
+        //   lng: position.coords.longitude,
+        //   accuracy: position.coords.accuracy,
+        // });
 
         this.currentPosition = {
           latitude: position.coords.latitude,
@@ -440,24 +440,24 @@ export class GPSTracker {
         }
 
         // watchPosition開始前のデバッグログ
-        console.log('[GPSTracker] watchPosition開始...');
+        // console.log('[GPSTracker] watchPosition開始...');
         this.positionUpdateCount = 0;
 
         // 位置情報の監視を開始（cl改善版設定）
         this.watchId = navigator.geolocation.watchPosition(
           (watchPosition) => {
             this.positionUpdateCount += 1;
-            console.log(
-              `[GPSTracker] watchPositionコールバック呼び出し #${this.positionUpdateCount}`,
-              {
-                lat: watchPosition.coords.latitude,
-                lng: watchPosition.coords.longitude,
-                accuracy: watchPosition.coords.accuracy,
-                timestamp: new Date(
-                  watchPosition.timestamp
-                ).toLocaleTimeString(),
-              }
-            );
+            // console.log(
+            //   `[GPSTracker] watchPositionコールバック呼び出し #${this.positionUpdateCount}`,
+            //   {
+            //     lat: watchPosition.coords.latitude,
+            //     lng: watchPosition.coords.longitude,
+            //     accuracy: watchPosition.coords.accuracy,
+            //     timestamp: new Date(
+            //       watchPosition.timestamp
+            //     ).toLocaleTimeString(),
+            //   }
+            // );
 
             // 前回位置を保存
             this.previousPosition = this.currentPosition;
@@ -480,17 +480,17 @@ export class GPSTracker {
             this.calculatePathDistance();
           },
           (error) => {
-            console.error('[GPSTracker] watchPositionエラー', {
-              code: error.code,
-              message: error.message,
-              callCount: this.positionUpdateCount,
-            });
+            // console.error('[GPSTracker] watchPositionエラー', {
+            //   code: error.code,
+            //   message: error.message,
+            //   callCount: this.positionUpdateCount,
+            // });
 
             // watchPositionが失敗した場合、定時更新方式を開始
             if (!this.usingTimerUpdate) {
-              console.log(
-                '[GPSTracker] watchPosition失敗、定時更新方式に切り替え'
-              );
+              // console.log(
+              //   '[GPSTracker] watchPosition失敗、定時更新方式に切り替え'
+              // );
               this.startTimerUpdate();
             }
 
@@ -507,16 +507,16 @@ export class GPSTracker {
           }
         );
 
-        console.log('[GPSTracker] watchPosition設定完了', {
-          watchId: this.watchId,
-        });
+        // console.log('[GPSTracker] watchPosition設定完了', {
+        //   watchId: this.watchId,
+        // });
 
         // 15秒後にwatchPositionが呼ばれていない場合、定時更新方式に切り替え
         setTimeout(() => {
           if (this.positionUpdateCount === 0 && !this.usingTimerUpdate) {
-            console.warn(
-              '[GPSTracker] 15秒間watchPositionが呼ばれていません、定時更新方式に切り替え'
-            );
+            // console.warn(
+            //   '[GPSTracker] 15秒間watchPositionが呼ばれていません、定時更新方式に切り替え'
+            // );
             this.startTimerUpdate();
           }
         }, 15000);
@@ -524,14 +524,14 @@ export class GPSTracker {
         resolve(true);
       },
       (error) => {
-        console.error(
-          `[GPSTracker] 位置取得エラー (${highAccuracy ? '高精度' : '低精度'}モード)`,
-          {
-            code: error.code,
-            message: error.message,
-            userAgent: navigator.userAgent,
-          }
-        );
+        // console.error(
+        //   `[GPSTracker] 位置取得エラー (${highAccuracy ? '高精度' : '低精度'}モード)`,
+        //   {
+        //     code: error.code,
+        //     message: error.message,
+        //     userAgent: navigator.userAgent,
+        //   }
+        // );
 
         // 高精度モードで失敗した場合、低精度モードを試行
         if (
@@ -539,7 +539,7 @@ export class GPSTracker {
           (error.code === error.POSITION_UNAVAILABLE ||
             error.code === error.TIMEOUT)
         ) {
-          console.log('[GPSTracker] 高精度モード失敗、低精度モードで再試行');
+          // console.log('[GPSTracker] 高精度モード失敗、低精度モードで再試行');
           this.tryGetPosition(false, resolve);
           return;
         }
@@ -573,15 +573,15 @@ export class GPSTracker {
 
   // GPS追跡停止（cl改善版）
   public stopTracking(): void {
-    console.log('[GPSTracker] GPS追跡停止');
+    // console.log('[GPSTracker] GPS追跡停止');
 
     // 残った累積距離があれば追加
     if (this.accumulatedDistance > 2) {
       this.totalDistance += this.accumulatedDistance;
-      console.log('[GPSTracker] 終了時累積追加', {
-        addedDistance: `${this.accumulatedDistance.toFixed(2)}m`,
-        totalDistance: `${this.totalDistance.toFixed(2)}m`,
-      });
+      // console.log('[GPSTracker] 終了時累積追加', {
+      //   addedDistance: `${this.accumulatedDistance.toFixed(2)}m`,
+      //   totalDistance: `${this.totalDistance.toFixed(2)}m`,
+      // });
 
       if (this.onDistanceUpdate) {
         this.onDistanceUpdate(this.totalDistance);
@@ -591,13 +591,13 @@ export class GPSTracker {
     if (this.watchId !== null) {
       navigator.geolocation.clearWatch(this.watchId);
       this.watchId = null;
-      console.log('[GPSTracker] watchPosition停止');
+      // console.log('[GPSTracker] watchPosition停止');
     }
 
     if (this.updateTimerId) {
       clearInterval(this.updateTimerId);
       this.updateTimerId = null;
-      console.log('[GPSTracker] 定時更新方式タイマー停止');
+      // console.log('[GPSTracker] 定時更新方式タイマー停止');
     }
 
     this.usingTimerUpdate = false;
@@ -616,7 +616,7 @@ export class GPSTracker {
 
   // 距離をリセット（cl改善版）
   public resetDistance(): void {
-    console.log('[GPSTracker] 距離リセット（cl改善版）');
+    // console.log('[GPSTracker] 距離リセット（cl改善版）');
     this.totalDistance = 0;
     this.accumulatedDistance = 0;
     this.consecutiveSmallMoves = 0;

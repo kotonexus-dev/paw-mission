@@ -12,7 +12,15 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  Shield,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  Loader2,
+  Heart,
+} from 'lucide-react';
 // import { auth } from '@/lib/firebase/config';
 import { useAuth } from '@/context/AuthContext';
 
@@ -23,9 +31,9 @@ export default function AdminLoginPage() {
   const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
-  const user = useAuth(); // NOTE_認証情報を取得
+  const [isLoading, setIsLoading] = useState(false); // ローディング状態管理
+  const user = useAuth();
 
-  // TODO: ここでユーザー情報をログ出力してデバッグ
   // console.log('[AdminLoginPage] User:', user.currentUser);
 
   // フォーム送信時のPIN認証処理
@@ -42,9 +50,12 @@ export default function AdminLoginPage() {
       return;
     }
 
+    setIsLoading(true); // ローディング開始
+
     try {
       if (!user.currentUser) {
         setError('ログイン情報が見つかりません');
+        setIsLoading(false);
         return;
       }
 
@@ -66,13 +77,17 @@ export default function AdminLoginPage() {
 
       const result = await res.json();
       if (result.verified) {
-        // 認証成功
+        // 認証成功 - ローディング継続して画面遷移
+        await new Promise((resolve) => {
+          setTimeout(resolve, 300); // ユーザーが完了状態を確認できるよう短時間待機
+        });
         router.push('/admin');
       } else {
         // 認証失敗
         setAttempts((prev) => prev + 1);
         setError('PINが正しくありません');
         setPin('');
+        setIsLoading(false); // ローディング終了
         // 3回失敗したらダッシュボードに戻る
         if (attempts >= 2) {
           setTimeout(() => {
@@ -81,8 +96,9 @@ export default function AdminLoginPage() {
         }
       }
     } catch (err) {
-      console.error('PIN認証エラー:', err);
+      // console.error('PIN認証エラー:', err);
       setError('PIN認証中にエラーが発生しました');
+      setIsLoading(false); // エラー時はローディング終了
     }
   };
 
@@ -99,6 +115,39 @@ export default function AdminLoginPage() {
           </p>
         </CardHeader>
         <CardContent className="pt-4">
+          {/* ローディング進捗表示 - dashboardスタイルに合わせたデザイン */}
+          {isLoading && (
+            <div className="mb-6 text-center">
+              <div className="mb-6 flex flex-col items-center">
+                <div className="relative">
+                  <div className="h-20 w-20 rounded-full bg-orange-100 flex items-center justify-center">
+                    <Heart className="h-12 w-12 text-orange-500" />
+                  </div>
+                  <div className="absolute inset-0 rounded-full border-2 border-orange-300 border-t-orange-500 animate-spin" />
+                </div>
+              </div>
+
+              <h2 className="text-lg font-bold mb-4 text-center text-gray-800">
+                認証中...
+              </h2>
+
+              <div className="flex justify-center space-x-2">
+                <div
+                  className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                  style={{ animationDelay: '0ms' }}
+                />
+                <div
+                  className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                  style={{ animationDelay: '150ms' }}
+                />
+                <div
+                  className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                  style={{ animationDelay: '300ms' }}
+                />
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label
@@ -124,6 +173,7 @@ export default function AdminLoginPage() {
                   inputMode="numeric"
                   pattern="[0-9]*"
                   autoFocus
+                  disabled={isLoading}
                 />
                 <Button
                   type="button"
@@ -131,6 +181,7 @@ export default function AdminLoginPage() {
                   size="icon"
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPin(!showPin)}
+                  disabled={isLoading}
                   aria-label={showPin ? 'PINを隠す' : 'PINを表示'}
                 >
                   {showPin ? (
@@ -166,9 +217,10 @@ export default function AdminLoginPage() {
             <Button
               type="submit"
               className="w-full bg-orange-500 hover:bg-orange-600 text-base py-3"
-              disabled={!pin || pin.length !== 4 || attempts >= 3}
+              disabled={!pin || pin.length !== 4 || attempts >= 3 || isLoading}
             >
-              管理者画面へ
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading ? '認証中...' : '管理者画面へ'}
             </Button>
           </form>
 
@@ -189,7 +241,7 @@ export default function AdminLoginPage() {
             variant="outline"
             onClick={() => router.push('/dashboard')}
             className="w-full text-sm py-3"
-            disabled={attempts >= 3}
+            disabled={attempts >= 3 || isLoading}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             ホーム画面に戻る

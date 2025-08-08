@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Trophy, Star, Sparkles } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+// import { useAuth } from '@/context/AuthContext';
 
 export default function GoalClearPage() {
   const router = useRouter();
   const [showAnimation, setShowAnimation] = useState(false);
-  const user = useAuth(); // 認証情報を取得
+  // const user = useAuth();
 
-  console.log('[GoalClearPage] User:', user.currentUser);
+  // console.log('[GoalClearPage] User:', user.currentUser);
 
   useEffect(() => {
     setShowAnimation(true);
