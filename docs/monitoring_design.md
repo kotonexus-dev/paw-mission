@@ -74,9 +74,9 @@ groups:
 ```bash
 global:
   smtp_smarthost: "smtp.gmail.com:587"
-  smtp_from:youremail@gmail.com
+  smtp_from: youremail@gmail.com
   smtp_auth_username: youremail@gmail.com
-  smtp_auth_password: mxxxxxxxxxxxxxxx # アプリパスワード
+  smtp_auth_password: xxxxxxxxxxxxxxxx # アプリパスワード
 
 route:
   receiver: "gmail-notify"
@@ -85,6 +85,9 @@ receivers:
   - name: "gmail-notify"
     email_configs:
       - to: youremail@gmail.com
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: youremail@gmail.com
+        auth_password: xxxxxxxxxxxxxxxx # アプリパスワード
         send_resolved: true
 
 ```
@@ -139,7 +142,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-インストール済みか確認 → Version: 5.9.1 の行があれば OK
+# インストール済みか確認 → Version: 5.9.1 の行があれば OK
 
 ```
 pip show prometheus-fastapi-instrumentator
@@ -178,7 +181,7 @@ docker compose stop prometheus alertmanager postgres-exporter node-exporter
           description: "HTTPレスポンスの平均時間が30秒間で1秒を超えました。"
 ```
 
-- # テスト用 ②：CPU 使用率が 1％を超えたら通知
+- #テスト用 ②：CPU 使用率が 1％を超えたら通知
 
 ```bash
       - alert: HighCPUUsage2
@@ -205,6 +208,12 @@ docker compose stop prometheus alertmanager postgres-exporter node-exporter
      return {"message": "This is a slow response"}
 ```
 
+### 2.5 docker imgae を再ビルド ＆ docker 起動！
+
+```bash
+docker-compose up --build
+```
+
 ### 3 postman でエンドポイント叩きまくる
 
 ```bash
@@ -218,6 +227,8 @@ GET http://localhost:8000/slow
 ---
 
 ### 5 mac ユーザー向け：CPU 使用率を上げるコマンド
+
+- ターミナル上で任意のディレクトリから実行可能です。
 
 ```bash
 yes > /dev/null &
@@ -241,6 +252,8 @@ yes > /dev/null &
 - [`http://localhost:9090/alerts`](http://localhost:9090/alerts)にアクセスして、HighCPUUsage2 が`PENDING`になればもうすぐ！`FIRING`になればメール届く（1 分後に届くことも！※時差有）
 
 - CPU 使用率を上げるコマンドの終了忘れずに！
+
+- ターミナル上で任意のディレクトリから実行可能です。
 
 ```bash
 killall yes

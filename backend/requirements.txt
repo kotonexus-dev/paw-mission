@@ -40,5 +40,5 @@ prometheus-fastapi-instrumentator==5.9.1
 
 # --- Caching ---
 fastapi-cache2==0.2.1
-redis[asyncio]==5.0.4
+redis[asyncio]==5.2.0
 

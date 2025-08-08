@@ -11,10 +11,16 @@ services:
       - "5433:5432" # ホスト5433→コンテナ5432
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   # Postgres Exporter
   postgres-exporter:
-    image: prometheuscommunity/postgres-exporter
+    image: prometheuscommunity/postgres-exporter:v0.15.0
     container_name: postgres_exporter
     restart: unless-stopped
     environment:
@@ -26,26 +32,30 @@ services:
 
   # Prometheus
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v2.55.0
     container_name: prometheus
     restart: unless-stopped
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - prometheus-data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     ports:
       - "9090:9090" # Prometheus Web UI
     depends_on:
       - postgres-exporter
+      - redis-exporter
+      - node-exporter
 
   # Alertmanager
   alertmanager:
-    image: prom/alertmanager
+    image: prom/alertmanager:v0.27.0
     container_name: alertmanager
     restart: unless-stopped
     volumes:
       - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager-data:/alertmanager
     command:
       - "--config.file=/etc/alertmanager/alertmanager.yml"
     ports:
@@ -55,7 +65,7 @@ services:
 
   # Node Exporter
   node-exporter:
-    image: prom/node-exporter
+    image: prom/node-exporter:v1.8.2
     container_name: node-exporter
     restart: unless-stopped
     ports:
@@ -79,10 +89,15 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Redis Exporter
   redis-exporter:
-    image: oliver006/redis_exporter
+    image: oliver006/redis_exporter:v1.62.0
     container_name: redis_exporter
     restart: unless-stopped
     ports:
@@ -94,11 +109,11 @@ services:
 
   # Grafana
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:11.3.1
     container_name: grafana
     restart: unless-stopped
     ports:
-      - "3001:3000" # ホスト:3001 → Grafana:3000（FastAPIと被らないよう注意）
+      - "3001:3000" # ホスト:3001 → Grafana:3000（frontendと被らないよう注意）
     volumes:
       - grafana-data:/var/lib/grafana
     environment:
@@ -111,3 +126,5 @@ volumes:
   pgdata:
   redis-data:
   grafana-data:
+  prometheus-data:
+  alertmanager-data:
