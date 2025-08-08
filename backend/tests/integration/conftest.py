@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def setup_test_db():
+def setup_test_db():
     """セッション単位でのデータベース初期化"""
     # FastAPICacheを初期化
     mock_backend = MagicMock()
@@ -19,18 +19,7 @@ async def setup_test_db():
     mock_backend.clear = AsyncMock()
     FastAPICache.init(backend=mock_backend, prefix="test-cache")
     
-    # グローバルなprisma_clientが常に接続されていることを保証します
-    if not prisma_client.is_connected():
-        await prisma_client.connect()
-
     yield
-
-    # セッション終了時に切断とクリーンアップ
-    try:
-        if prisma_client.is_connected():
-            await prisma_client.disconnect()
-    except Exception as e:
-        print(f"セッションクリーンアップ時のエラー: {e}")
     
     # FastAPICacheクリーンアップ
     FastAPICache._coder = None
