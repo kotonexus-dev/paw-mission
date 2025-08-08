@@ -65,7 +65,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
-      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TEST }}
+      TESTING: "1"
 
     steps:
       - name: Checkout repository

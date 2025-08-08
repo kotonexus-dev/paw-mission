@@ -74,9 +74,9 @@ groups:
 ```bash
 global:
   smtp_smarthost: "smtp.gmail.com:587"
-  smtp_from:youremail@gmail.com
+  smtp_from: youremail@gmail.com
   smtp_auth_username: youremail@gmail.com
-  smtp_auth_password: mxxxxxxxxxxxxxxx # アプリパスワード
+  smtp_auth_password: xxxxxxxxxxxxxxxx # アプリパスワード
 
 route:
   receiver: "gmail-notify"
@@ -85,6 +85,9 @@ receivers:
   - name: "gmail-notify"
     email_configs:
       - to: youremail@gmail.com
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: youremail@gmail.com
+        auth_password: xxxxxxxxxxxxxxxx # アプリパスワード
         send_resolved: true
 
 ```
@@ -139,7 +142,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-インストール済みか確認 → Version: 5.9.1 の行があれば OK
+# インストール済みか確認 → Version: 5.9.1 の行があれば OK
 
 ```
 pip show prometheus-fastapi-instrumentator
@@ -161,11 +164,9 @@ docker ps
 docker compose stop prometheus alertmanager postgres-exporter node-exporter
 ```
 
-### ---------------　　！！ここからは余裕があれば！！　　------------------
-
 ## 手順 ⑤：起動確認テスト
 
-### 1⃣Section9_TeamC\monitoring\alert_rules.yml の以下のコード有効化
+### 1 Section9_TeamC\monitoring\alert_rules.yml の以下のコード有効化
 
 - #テスト用 ①：レスポンスタイムテスト
 
@@ -180,7 +181,7 @@ docker compose stop prometheus alertmanager postgres-exporter node-exporter
           description: "HTTPレスポンスの平均時間が30秒間で1秒を超えました。"
 ```
 
-- # テスト用 ②：CPU 使用率が 1％を超えたら通知
+- #テスト用 ②：CPU 使用率が 1％を超えたら通知
 
 ```bash
       - alert: HighCPUUsage2
@@ -194,7 +195,7 @@ docker compose stop prometheus alertmanager postgres-exporter node-exporter
 
 ```
 
-### 2⃣backend/app/main.py の一番下のコード有効化
+### 2 backend/app/main.py の一番下のコード有効化
 
 ```bash
 # レスポンスタイム遅延テスト用エンドポイント
@@ -207,7 +208,13 @@ docker compose stop prometheus alertmanager postgres-exporter node-exporter
      return {"message": "This is a slow response"}
 ```
 
-### 3⃣postman でエンドポイント叩きまくる 🌱
+### 2.5 docker imgae を再ビルド ＆ docker 起動！
+
+```bash
+docker-compose up --build
+```
+
+### 3 postman でエンドポイント叩きまくる
 
 ```bash
 GET http://localhost:8000/slow
@@ -215,11 +222,13 @@ GET http://localhost:8000/slow
 
 [`http://localhost:9090/alerts`](http://localhost:9090/alerts)にアクセスして、HighResponseTime2 が`PENDING`になればもうすぐ！`FIRING`になればメール届く（1 分後に届くことも！※時差有）
 
-### 4⃣ メール届いたら、「レスポンスタイムが〇秒を超えた場合にメール通知」テストクリア！
+### 4 メール届いたら、「レスポンスタイムが〇秒を超えた場合にメール通知」テストクリア！
 
 ---
 
-### 5⃣mac ユーザー向け：CPU 使用率を上げるコマンド
+### 5 mac ユーザー向け：CPU 使用率を上げるコマンド
+
+- ターミナル上で任意のディレクトリから実行可能です。
 
 ```bash
 yes > /dev/null &
@@ -244,11 +253,13 @@ yes > /dev/null &
 
 - CPU 使用率を上げるコマンドの終了忘れずに！
 
+- ターミナル上で任意のディレクトリから実行可能です。
+
 ```bash
 killall yes
 ```
 
-### 5⃣Windows ユーザー向け：CPU 使用率を上げるコマンド
+### 5 Windows ユーザー向け：CPU 使用率を上げるコマンド
 
 ```bash
 Start-Job { while ($true) {} }
@@ -264,4 +275,4 @@ Get-Job | Stop-Job
 Get-Job | Remove-Job
 ```
 
-### 6⃣ メール届けば「サーバーの CPU 使用率が〇％を超えたらアラート発生」テストクリア！
+### 6 メール届けば「サーバーの CPU 使用率が〇％を超えたらアラート発生」テストクリア！

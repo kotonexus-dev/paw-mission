@@ -3,19 +3,32 @@
 import os
 from contextlib import asynccontextmanager
 
+# NOTE: 本番環境ではコメントアウト or 削除しておくこと
+import time
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
-# fastapi-cache2 + Redis をimport
+
+# fastapi-cache2
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+
+# NOTE: キャッシュ機能の検証が完了したら削除または専用ルーターに移動する
+from fastapi_cache.decorator import cache
+
+# Redis をimport
 import redis.asyncio as redis
 
-# .envファイルから環境変数を読み込む
+# FastAPI Exporterを使ってメトリクス収集のためimport
+from prometheus_fastapi_instrumentator import Instrumentator
+
+# .envファイルから環境変数を読み込む（依存関係のあるモジュールより先に実行する必要がある）
 load_dotenv()
 
-# ルーターの import
+# NOTE: 以下の import は load_dotenv() の後に配置する必要がある
+# pylint: disable-next=wrong-import-position,wrong-import-order
 from app.routers.user import user_router
 from app.routers.care_logs import care_logs_router
 from app.routers.care_settings import care_settings_router
@@ -27,10 +40,6 @@ from app.routers.webhook_events import webhook_events_router
 
 # Prisma Client を使うための import
 from app.db import prisma_client
-
-
-# FastAPI Exporterを使ってメトリクス収集のためimport
-from prometheus_fastapi_instrumentator import Instrumentator
 
 
 # Prisma Client の lifespan context manager（FastAPI v0.95以降の推奨）
@@ -89,24 +98,22 @@ Instrumentator().instrument(app).expose(app)
 
 # レスポンスタイム遅延テスト用エンドポイント
 # NOTE: Prometheusのアラート発火を意図的に検証するために使用する
-# TODO: 本番環境ではコメントアウト or 削除しておくこと
-# import time
-#
-#
 # @app.get("/slow")
 # async def slow_endpoint():
 #     """わざと5.0秒待つ遅いレスポンス（Prometheusのalertテスト用）"""
 #     time.sleep(5.0)
 #     return {"message": "This is a slow response"}
 
-# Redisキャッシュテスト用エンドポイント
-# TODO: キャッシュ機能の検証が完了したら削除または専用ルーターに移動する
-# FIXME: 現状ではキャッシュの有効性テストのみに使われており、仕様上の制約に注意
-# from fastapi_cache.decorator import cache#
-#
 
-# @app.get("/cache-test")
-# @cache(expire=60)
-# async def cache_test():
-#     print("🔥 この関数が実行された！（キャッシュなし時）")
-#     return {"message": "キャッシュされるはず！"}
+# Redisキャッシュテスト用エンドポイント
+# NOTE: 現状ではキャッシュの有効性テストのみに使われており、仕様上の制約に注意
+@app.get("/cache-test")
+@cache(expire=60)
+async def cache_test():
+    """Redisキャッシュ機能をテストするエンドポイント
+
+    Returns:
+        dict: キャッシュテスト用メッセージ
+    """
+    print("🔥 この関数が実行された！（キャッシュなし時）")
+    return {"message": "キャッシュされるはず！"}

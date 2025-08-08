@@ -41,15 +41,18 @@
 
 ## 技術構成
 
-| 役割           | 技術・サービス                                                     |
-| -------------- | ------------------------------------------------------------------ |
-| フロントエンド | Next.js, TypeScript, Tailwind CSS                                  |
-| バックエンド   | FastAPI, Python                                                    |
-| データベース   | PostgreSQL, Prisma                                                 |
-| 外部 API       | OpenAI, Geolocation API                                            |
-| 外部サービス   | Firebase（認証）, Stripe（決済）, AWS S3（画像や動画のストレージ） |
-| デプロイ       | Vercel, Render                                                     |
-| その他         | Adobe Firefly, Figma, GitHub, Docker                               |
+| 役割             | 技術・サービス                                                       |
+| ---------------- | -------------------------------------------------------------------- |
+| フロントエンド   | Next.js 15.3.4, TypeScript 5.3.3, Tailwind CSS 4.x, React 19.0.0     |
+| バックエンド     | FastAPI 0.115.1, Python 3.11, Uvicorn 0.34.0                         |
+| データベース     | PostgreSQL 15, Prisma 0.15.0                                         |
+| 外部 API         | OpenAI 1.30.3, Geolocation API                                       |
+| 外部サービス     | Firebase 11.10.0（認証）, Stripe 9.9.0（決済）, AWS S3（ストレージ） |
+| デプロイ         | Vercel, Render                                                       |
+| 開発・品質管理   | ESLint 8.57.0, Prettier 3.1.0, Pylint 3.0.3, Black 23.12.0           |
+| テスト           | Vitest 3.2.4, Playwright 1.54.1, Pytest 8.2.2                        |
+| キャッシュ・監視 | Redis 5.2.0, Prometheus, Grafana                                     |
+| その他           | Node.js 24.1.0, Docker, GitHub Actions                               |
 
 ## アーキテクチャー図
 
@@ -65,7 +68,7 @@ _システム全体の構成と各コンポーネントの関係を示したア�
 ├── backend/    # FastAPI バックエンド
 ├── frontend/   # Next.js フロントエンド
 ├── docs/       # ドキュメンテーション関連
-├── monitoring　# Prometheus・Grafana等の監視設定
+├── monitoring/　# Prometheus・Grafana等の監視設定
 ├── docker-compose.yml
 ├── README.md
 └── ...
@@ -182,46 +185,57 @@ DATABASE_URL=postgresql://user:password@localhost:5432/myapp_db
 **現状**
 
 - バックエンド：93%（目標 80%以上を達成）
-- フロントエンド：**約61%**（Statement Coverage: 60.78%, Branch Coverage: 69.08%, Function Coverage: 43.62%）
+- フロントエンド：**約 61%**（Statement Coverage: 60.78%, Branch Coverage: 69.08%, Function Coverage: 43.62%）
 
 **フロントエンドカバレッジの詳細**
 
 現在の良好なカバレッジを達成している領域と改善が必要な領域：
 
 **テスト済み領域（高カバレッジ）:**
+
 - ダッシュボード機能: 統合テストにより主要フローをカバー
 - 認証・ユーザー管理: 基本的な認証フローをテスト
 - UI コンポーネント: 一部コンポーネントの動作確認
 
 **改善が必要な領域:**
+
 - 管理者機能: テストカバレッジが不十分
 - オンボーディング機能: 複雑なフローの一部未テスト
 - エラーハンドリング: 異常系のテストケースが少ない
-- カスタムフック: Function Coverage が43.62%と低い
+- カスタムフック: Function Coverage が 43.62%と低い
 
 **今後の改善計画**
 
 1. **短期目標（70%到達）**
+
    - 管理者機能の統合テスト強化（現在進行中）
-   - カスタムフックの単体テスト追加でFunction Coverageを60%以上に向上
+   - カスタムフックの単体テスト追加で Function Coverage を 60%以上に向上
    - エラーハンドリング系の異常系テスト拡充
 
 2. **中期目標（80%到達）**
-   - Playwrightによる E2E テスト拡張
+
+   - Playwright による E2E テスト拡張
    - オンボーディングフロー全体の統合テスト完全カバー
-   - API通信層の単体テスト追加
+   - API 通信層の単体テスト追加
 
 3. **長期目標（85%以上）**
    - 全ページコンポーネントの統合テスト完全カバー
    - パフォーマンステスト・アクセシビリティテストの導入
-   - CI/CDパイプラインでのカバレッジ閾値設定
+   - CI/CD パイプラインでのカバレッジ閾値設定
 
 **実行方法**
 
 ```bash
 # バックエンドテスト
 cd backend
+# Mac / Linux
 source venv/bin/activate
+# Windows
+# 仮想環境の有効化（コマンドプロンプト）
+venv\Scripts\activate
+# 仮想環境の有効化（PowerShellの場合）
+venv\Scripts\Activate.ps1
+# テスト実行
 python -m pytest tests --cov=app --cov-report=term-missing
 
 # フロントエンドテスト
@@ -265,10 +279,10 @@ npm run test
 
 詳細な設計内容は以下をご参照ください。
 
-- [キャッシュ・リソース管理設計書](docs\redis-cache-resource-design.md)
+- [キャッシュ・リソース管理設計書](docs/redis-cache-resource-design.md)
 
 - システム構成図
-  ![システム構成図](docs\redis-cache-architecture.png)
+  ![システム構成図](docs/redis-cache-architecture.png)
 
 ## ライセンス
 
