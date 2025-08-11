@@ -479,10 +479,10 @@ export class GPSTracker {
             // 距離計算処理（路徑距離）
             this.calculatePathDistance();
           },
-          (error) => {
+          (_error) => {
             // console.error('[GPSTracker] watchPositionエラー', {
-            //   code: error.code,
-            //   message: error.message,
+            //   code: _error.code,
+            //   message: _error.message,
             //   callCount: this.positionUpdateCount,
             // });
 
@@ -670,8 +670,8 @@ export const checkLocationPermission = (): Promise<boolean> =>
       () => {
         resolve(true);
       },
-      (error) => {
-        if (error.code === error.PERMISSION_DENIED) {
+      (_error) => {
+        if (_error.code === _error.PERMISSION_DENIED) {
           resolve(false);
         } else {
           resolve(true); // 他のエラーは一時的なものとして許可ありとみなす
