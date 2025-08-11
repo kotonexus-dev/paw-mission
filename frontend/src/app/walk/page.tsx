@@ -349,8 +349,8 @@ export default function WalkPage() {
       const token = await getFirebaseToken(shouldForceRefresh);
 
       // バックエンドに散歩データ保存
-      const result = await saveWalkRecord(walkData, careSettingId, token);
-      // console.log('散歩データ保存完了:', result);
+      await saveWalkRecord(walkData, careSettingId, token);
+      // 散歩データ保存完了
 
       // ローカルストレージにも保存（バックアップ）
       const existingWalks = JSON.parse(

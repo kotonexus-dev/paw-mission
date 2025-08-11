@@ -156,24 +156,24 @@ export default function DashboardPage() {
   // ダイアログ表示用の state
   const [showNoCareDialog, setShowNoCareDialog] = useState(false);
 
-  // デバッグ用：loading状態を監視
-  useEffect(() => {
-    const info = {
-      authLoading,
-      currentUser: !!currentUser,
-      careSettingsId: careSettings?.id,
-      loading,
-      careSettingsLoading,
-      timestamp: new Date().toLocaleTimeString(),
-    };
-    // console.log('[Dashboard] Loading状態:', info);
-  }, [
-    authLoading,
-    currentUser,
-    careSettings?.id,
-    loading,
-    careSettingsLoading,
-  ]);
+  // デバッグ用 loading状態を監視
+  // useEffect(() => {
+  //   const info = {
+  //     authLoading,
+  //     currentUser: !!currentUser,
+  //     careSettingsId: careSettings?.id,
+  //     loading,
+  //     careSettingsLoading,
+  //     timestamp: new Date().toLocaleTimeString(),
+  //   };
+  // console.log('[Dashboard] Loading状態:', info);
+  // }, [
+  //   authLoading,
+  //   currentUser,
+  //   careSettings?.id,
+  //   loading,
+  //   careSettingsLoading,
+  // ]);
 
   // タイムアウト処理：15秒後に強制的にloading状態を解除
   useEffect(() => {
@@ -453,22 +453,24 @@ export default function DashboardPage() {
             });
 
             if (createRes.ok) {
-              const createdData = await createRes.json();
+              // const createdData = await createRes.json();
               // console.log(
               //   '[Dashboard] 昨日のcare_log自動作成成功:',
               //   createdData.id
               // );
+              await createRes.json(); // レスポンスを消費
             } else if (createRes.status === 409 || createRes.status === 400) {
               // 409エラー（既存記録）は無視
               // console.log('[Dashboard] 昨日のcare_log既存のため作成スキップ');
             } else {
               // その他のエラーはログ出力
-              const errorText = await createRes.text();
+              // const errorText = await createRes.text();
               // console.error(
               //   '[Dashboard] 昨日のcare_log作成失敗:',
               //   createRes.status,
               //   errorText
               // );
+              await createRes.text(); // の他のエラー時もレスポンスを消費
             }
           } catch (createError) {
             // console.error(
@@ -595,9 +597,11 @@ export default function DashboardPage() {
             fed_night: missionId === 'evening-food',
           }),
         });
+
         if (!res.ok) {
-          const text = await res.text();
+          // const text = await res.text();
           // console.error('POST失敗', res.status, text);
+          await res.text(); // エラー詳細を消費
           throw new Error('POST失敗');
         }
         const data = await res.json();
@@ -617,12 +621,14 @@ export default function DashboardPage() {
           }
         );
         if (!resPatch.ok) {
-          const text = await resPatch.text();
+          // const text = await resPatch.text();
           // console.error('PATCH失敗', resPatch.status, text);
+          await resPatch.text(); // エラー詳細を消費
           throw new Error('PATCH失敗');
         }
-        const dataPatch = await resPatch.json();
+        // const dataPatch = await resPatch.json();
         // console.log('PATCH成功', { careLogId, missionId, data: dataPatch });
+        await resPatch.json(); // レスポンスを消費
       }
       // 更新後、再取得
       const now2 = new Date();
@@ -638,8 +644,10 @@ export default function DashboardPage() {
         }
       );
       if (!res2.ok) {
-        const text = await res2.text();
+        // const text = await res2.text();
         // console.error('取得後失敗', res2.status, text);
+        await res2.text(); // エラー詳細を消費
+        throw new Error('取得後失敗');
       } else {
         const data2 = await res2.json();
         // console.log('取得後', data2);

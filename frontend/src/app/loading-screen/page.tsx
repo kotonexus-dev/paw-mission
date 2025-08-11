@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Dog } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+// import { useAuth } from '@/context/AuthContext';
 
 export default function LoadingScreen() {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
-  const user = useAuth();
+  // const user = useAuth();
 
   // console.log('[LoadingScreen] User:', user.currentUser);
 

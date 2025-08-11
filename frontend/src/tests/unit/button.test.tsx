@@ -30,7 +30,7 @@ describe('Button', () => {
   it('asChildをtrueにするとbuttonタグではなくなる', () => {
     render(
       <Button asChild>
-        <a data-testid="custom-button" href="#">
+        <a data-testid="custom-button" href="#test">
           Link
         </a>
       </Button>

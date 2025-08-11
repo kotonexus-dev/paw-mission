@@ -221,13 +221,8 @@ describe('振り返り機能とその他ページテスト', () => {
 
     mockUseAuth.mockReturnValue(mockAuthValue);
 
-    // WelcomeBackPageを動的にインポート
-    let WelcomeBackPage: any;
-    try {
-      WelcomeBackPage = (await import('@/app/welcome-back/page')).default;
-    } catch (error) {
-      // ページが存在しない場合のダミーコンポーネント
-      WelcomeBackPage = () => (
+    // WelcomeBackPageのダミーコンポーネント（削除されたページの代替）
+    const WelcomeBackPage = () => (
         <div>
           <h1>おかえりなさい！</h1>
           <p>太郎くんとポチちゃん、今日も一日頑張りましょう</p>
@@ -249,7 +244,6 @@ describe('振り返り機能とその他ページテスト', () => {
           <button>ダッシュボードへ</button>
         </div>
       );
-    }
 
     const { AuthProvider } = await import('@/context/AuthContext');
 

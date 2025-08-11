@@ -1,11 +1,5 @@
 // Dashboard comprehensive integration test
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  act,
-} from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useAuth } from '@/context/AuthContext';
 import DashboardPage from '@/app/dashboard/page';
@@ -426,14 +420,17 @@ describe('ダッシュボード完全統合テスト', () => {
       );
 
       // Try to find and click the morning food button if available
-      const morningFoodButton = screen.queryByRole('button', { name: /あさごはん/ }) ||
-                                 screen.queryByRole('button', { name: 'あさごはん' }) ||
-                                 screen.queryAllByRole('button').find(btn => btn.textContent?.includes('あさごはん'));
-      
+      const morningFoodButton =
+        screen.queryByRole('button', { name: /あさごはん/ }) ||
+        screen.queryByRole('button', { name: 'あさごはん' }) ||
+        screen
+          .queryAllByRole('button')
+          .find((btn) => btn.textContent?.includes('あさごはん'));
+
       if (morningFoodButton) {
         fireEvent.click(morningFoodButton);
       } else {
-        console.log('[DEBUG] Morning food button not found, skipping interaction');
+        // console.log('[DEBUG] Morning food button not found, skipping interaction');
       }
 
       // Just verify that some API calls were made
