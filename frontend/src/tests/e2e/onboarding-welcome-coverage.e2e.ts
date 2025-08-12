@@ -17,8 +17,8 @@ test('カバレッジ収集付き：始めるボタン表示と遷移テスト',
 
   // coverage/tmp に保存
   fs.mkdirSync('coverage/tmp', { recursive: true });
-  for (const entry of coverage) {
+  coverage.forEach((entry) => {
     const filename = path.basename(entry.url).split('?')[0] || 'index.js';
     fs.writeFileSync(`coverage/tmp/${filename}.v8.json`, JSON.stringify(entry));
-  }
+  });
 });

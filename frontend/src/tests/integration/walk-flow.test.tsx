@@ -1,4 +1,13 @@
 // GPS Tracker のモック - 直接的なアプローチ
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { useAuth } from '@/context/AuthContext';
+import WalkPage from '@/app/walk/page';
+import {
+  saveWalkRecord,
+  determineWalkSuccess,
+} from '@/app/api/walk_api/walkApi';
+
 vi.mock('@/app/api/geo/geoLocation', () => {
   const mockInstance = {
     startTracking: vi.fn().mockResolvedValue(true),
@@ -17,15 +26,6 @@ vi.mock('@/app/api/geo/geoLocation', () => {
     calculateDistance: vi.fn().mockReturnValue(0),
   };
 });
-
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { useAuth } from '@/context/AuthContext';
-import WalkPage from '@/app/walk/page';
-import {
-  saveWalkRecord,
-  determineWalkSuccess,
-} from '@/app/api/walk_api/walkApi';
 
 // AuthContextのモック
 vi.mock('@/context/AuthContext', () => ({

@@ -4,7 +4,7 @@
 export function utcIsoToJstDateString(utcIsoString: string): string {
   const date = new Date(utcIsoString);
   // 9時間足す
-  if (isNaN(date.getTime())) return 'Invalid Date'; // MEMO_日付が無効な場合testにより追加
+  if (Number.isNaN(date.getTime())) return 'Invalid Date'; // MEMO_日付が無効な場合testにより追加
   date.setHours(date.getHours() + 9);
   return date.toISOString().slice(0, 10);
 }
