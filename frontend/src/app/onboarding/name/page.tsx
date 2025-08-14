@@ -15,7 +15,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Users, Heart } from 'lucide-react'; // lucide-reactアイコン
-import { useAuth } from '@/context/AuthContext';
+// import { useAuth } from '@/context/AuthContext';
 
 export default function NamePage() {
   // DB：care_settingsテーブルに対応
@@ -23,9 +23,9 @@ export default function NamePage() {
   const [parentName, setParentName] = useState('');
   const [childName, setChildName] = useState('');
   const [dogName, setdogName] = useState(''); // 親名前、子ども名前、ペット名前未入力
-  const user = useAuth(); // 認証情報を取得
+  // const user = useAuth();
 
-  console.log('[NamePage] User:', user.currentUser);
+  // console.log('[NamePage] User:', user.currentUser);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +37,7 @@ export default function NamePage() {
         dogName: dogName.trim(),
       };
       localStorage.setItem('familyInfo', JSON.stringify(familyData));
-      console.log('[NamePage] Saving family info:', familyData);
+      // console.log('[NamePage] Saving family info:', familyData);
 
       router.push('/onboarding/first-settings'); // 次のページへ遷移
     }

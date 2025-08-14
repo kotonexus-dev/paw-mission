@@ -245,7 +245,7 @@ export default function WalkGPSTestPage() {
       handlePositionUpdate,
       (error) => {
         addDebugInfo(`GPSエラー: ${error.message} (code: ${error.code})`);
-        console.error('GPS error:', error);
+        // console.error('GPS error:', error);
       },
       {
         enableHighAccuracy: true,

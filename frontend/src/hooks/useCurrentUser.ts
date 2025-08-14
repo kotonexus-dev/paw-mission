@@ -52,7 +52,7 @@ export default function useCurrentUser() {
       // サーバーから来たレスポンスをJSONに変換
       const data = await res.json();
 
-      console.log('useCurrentUserのfetchデータ確認:', data);
+      // console.log('useCurrentUserのfetchデータ確認:', data);
 
       // 取得したデータを画面で使えるようにstateにセット
       setUser({
@@ -62,7 +62,7 @@ export default function useCurrentUser() {
         current_plan: data.current_plan,
       });
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       setError('ユーザー情報の取得に失敗しました');
     } finally {
       setLoading(false);

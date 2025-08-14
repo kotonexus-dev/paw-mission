@@ -4,7 +4,7 @@ import os
 from contextlib import asynccontextmanager
 
 # NOTE: 本番環境ではコメントアウト or 削除しておくこと
-import time
+# import time
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
@@ -16,7 +16,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
 # NOTE: キャッシュ機能の検証が完了したら削除または専用ルーターに移動する
-from fastapi_cache.decorator import cache
+# from fastapi_cache.decorator import cache
 
 # Redis をimport
 import redis.asyncio as redis
@@ -48,7 +48,9 @@ async def lifespan(_: FastAPI):
     """起動時と終了時の処理をまとめて管理"""
     # Redis接続
     # NOTE: Redisはローカル環境（localhost:6379）を想定しているため、Docker環境では別途設定が必要
-    redis_client = redis.Redis(host="localhost", port=6379, decode_responses=True)
+    # redis_client = redis.Redis(host="localhost", port=6379, decode_responses=True)
+    # docker環境でのRedis接続を考慮
+    redis_client = redis.Redis(host="redis", port=6379, decode_responses=True)
 
     # FastAPICacheを先に初期化
     FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
@@ -107,13 +109,13 @@ Instrumentator().instrument(app).expose(app)
 
 # Redisキャッシュテスト用エンドポイント
 # NOTE: 現状ではキャッシュの有効性テストのみに使われており、仕様上の制約に注意
-@app.get("/cache-test")
-@cache(expire=60)
-async def cache_test():
-    """Redisキャッシュ機能をテストするエンドポイント
+# @app.get("/cache-test")
+# @cache(expire=60)
+# async def cache_test():
+#     """Redisキャッシュ機能をテストするエンドポイント
 
-    Returns:
-        dict: キャッシュテスト用メッセージ
-    """
-    print("🔥 この関数が実行された！（キャッシュなし時）")
-    return {"message": "キャッシュされるはず！"}
+#     Returns:
+#         dict: キャッシュテスト用メッセージ
+#     """
+#     print("🔥 この関数が実行された！（キャッシュなし時）")
+#     return {"message": "キャッシュされるはず！"}

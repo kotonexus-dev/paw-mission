@@ -1,4 +1,4 @@
-# app/routers/payment.py
+"""決済のAPIルーター定義"""
 
 from fastapi import APIRouter, HTTPException, Depends
 from app.services import stripe_service

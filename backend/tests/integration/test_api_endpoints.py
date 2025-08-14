@@ -719,24 +719,37 @@ class TestPaymentAPI:
     @pytest.mark.asyncio
     async def test_payment_authentication_errors(self, test_db):
         """決済API認証エラーテスト"""
-        async with AsyncClient(app=app, base_url="http://test") as ac:
-            # 1. 認証ヘッダーなしでのアクセス
-            no_auth_response = await ac.post("/api/payments/create-checkout-session")
-            assert no_auth_response.status_code in [200, 401, 422]
-
-            # 2. 無効な認証ヘッダーでのアクセス
-            invalid_headers = {"Authorization": "Bearer invalid_payment_token"}
-            invalid_auth_response = await ac.post(
-                "/api/payments/create-checkout-session", headers=invalid_headers
-            )
-            assert invalid_auth_response.status_code in [200, 401, 422]
-
-            # 3. 不正な認証フォーマット
-            wrong_format_headers = {"Authorization": "InvalidFormat token"}
-            wrong_format_response = await ac.post(
-                "/api/payments/create-checkout-session", headers=wrong_format_headers
-            )
-            assert wrong_format_response.status_code in [200, 401, 422]
+        # 一時的にFirebase認証のオーバーライドを削除してテスト用の実際の認証を使用
+        original_override = app.dependency_overrides.get(verify_firebase_token)
+        
+        try:
+            # Firebase認証オーバーライドを削除（実際の認証を使用）
+            if verify_firebase_token in app.dependency_overrides:
+                del app.dependency_overrides[verify_firebase_token]
+                
+            async with AsyncClient(app=app, base_url="http://test") as ac:
+                # 1. 認証ヘッダーなしでのアクセス
+                no_auth_response = await ac.post("/api/payments/create-checkout-session")
+                assert no_auth_response.status_code == 401
+    
+                # 2. 無効な認証ヘッダーでのアクセス
+                invalid_headers = {"Authorization": "Bearer invalid_payment_token"}
+                invalid_auth_response = await ac.post(
+                    "/api/payments/create-checkout-session", headers=invalid_headers
+                )
+                assert invalid_auth_response.status_code == 401
+    
+                # 3. 不正な認証フォーマット
+                wrong_format_headers = {"Authorization": "InvalidFormat token"}
+                wrong_format_response = await ac.post(
+                    "/api/payments/create-checkout-session", headers=wrong_format_headers
+                )
+                assert wrong_format_response.status_code == 401
+                
+        finally:
+            # オーバーライドを元に戻す
+            if original_override:
+                app.dependency_overrides[verify_firebase_token] = original_override
 
 
 class TestMessageLogsAPI:

@@ -12,8 +12,7 @@ from app.dependencies import verify_firebase_token
 from openai import OpenAI, OpenAIError
 
 message_logs_router = APIRouter(prefix="/api/message_logs", tags=["message_logs"])
-
-# To-do: ひらがなにする
+# 無料プランの固定メッセージ
 FREE_PLAN_MESSAGES = ["わん！", "おなかすいたわん！", "おさんぽいくわん！"]
 
 

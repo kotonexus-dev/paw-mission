@@ -28,7 +28,7 @@ export function useCareLogs(careSettingId: number) {
     setLoading(true);
     setError('');
     try {
-      console.log('[useCareLogs] fetchCareLogs start');
+      // console.log('[useCareLogs] fetchCareLogs start');
 
       // Firebase認証チェック
       if (!currentUser) {
@@ -44,7 +44,7 @@ export function useCareLogs(careSettingId: number) {
         'Asia/Tokyo',
         'yyyy-MM-dd'
       );
-      console.log('[useCareLogs] todayJapanの確認:', todayJapan);
+      // console.log('[useCareLogs] todayJapanの確認:', todayJapan);
 
       // バックエンドのFastAPIに直接GETリクエスト
       const res = await fetch(
@@ -60,7 +60,7 @@ export function useCareLogs(careSettingId: number) {
       if (!res.ok) {
         if (res.status === 404) {
           // 記録なし（デフォルト値扱い）
-          console.log('[useCareLogs] No care_log found (404)');
+          // console.log('[useCareLogs] No care_log found (404)');
           setCareLog(null);
           return;
         }
@@ -71,13 +71,13 @@ export function useCareLogs(careSettingId: number) {
       // サーバーから来たレスポンスをJSONに変換
       const data = await res.json();
 
-      console.log('useCareLogsのfetchデータ確認:', data);
+      // console.log('useCareLogsのfetchデータ確認:', data);
       // 取得したデータを画面で使えるようにstateにセット
       setCareLog(data);
 
       // エラーがあればここでキャッチ
     } catch (err) {
-      console.error('[useCareLogs] fetchCareLogs error:', err);
+      // console.error('[useCareLogs] fetchCareLogs error:', err);
       setError('ケアログの取得に失敗しました');
       // 最後にローディング終了(読み込み終了)
     } finally {

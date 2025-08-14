@@ -16,12 +16,12 @@ export default function Home() {
 
     // ログイン済みの場合はダッシュボードへ
     if (currentUser) {
-      console.log('[Home] ログイン済みユーザー - ダッシュボードにリダイレクト');
+      // console.log('[Home] ログイン済みユーザー - ダッシュボードにリダイレクト');
       router.push('/dashboard');
     } else {
       // 未ログインの場合はオンボーディングへ
-      console.log('[Home] 未ログインユーザー - オンボーディングにリダイレクト');
-    router.push('/onboarding/welcome');
+      // console.log('[Home] 未ログインユーザー - オンボーディングにリダイレクト');
+      router.push('/onboarding/welcome');
     }
   }, [currentUser, loading, router]);
 

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-// import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -133,7 +132,7 @@ export default function DashboardPage() {
   } | null>(null);
   const [careSettingsLoading, setCareSettingsLoading] = useState(true);
 
-  console.log('[Dashboard] User:', currentUser);
+  // console.log('[Dashboard] User:', currentUser);
 
   // Firebase認証トークンを取得するヘルパー関数（walk/page.tsx のパターンを採用）
   const getFirebaseToken = useCallback(async (): Promise<string> => {
@@ -157,24 +156,24 @@ export default function DashboardPage() {
   // ダイアログ表示用の state
   const [showNoCareDialog, setShowNoCareDialog] = useState(false);
 
-  // デバッグ用：loading状態を監視
-  useEffect(() => {
-    const info = {
-      authLoading,
-      currentUser: !!currentUser,
-      careSettingsId: careSettings?.id,
-      loading,
-      careSettingsLoading,
-      timestamp: new Date().toLocaleTimeString(),
-    };
-    console.log('[Dashboard] Loading状態:', info);
-  }, [
-    authLoading,
-    currentUser,
-    careSettings?.id,
-    loading,
-    careSettingsLoading,
-  ]);
+  // デバッグ用 loading状態を監視
+  // useEffect(() => {
+  //   const info = {
+  //     authLoading,
+  //     currentUser: !!currentUser,
+  //     careSettingsId: careSettings?.id,
+  //     loading,
+  //     careSettingsLoading,
+  //     timestamp: new Date().toLocaleTimeString(),
+  //   };
+  // console.log('[Dashboard] Loading状態:', info);
+  // }, [
+  //   authLoading,
+  //   currentUser,
+  //   careSettings?.id,
+  //   loading,
+  //   careSettingsLoading,
+  // ]);
 
   // タイムアウト処理：15秒後に強制的にloading状態を解除
   useEffect(() => {
@@ -186,16 +185,16 @@ export default function DashboardPage() {
         loading ||
         careSettingsLoading
       ) {
-        console.warn(
-          '[Dashboard] Loading timeout - 強制的に次の画面に進みます'
-        );
-        console.warn('[Dashboard] 最終状態:', {
-          authLoading,
-          currentUser: !!currentUser,
-          careSettingsId: careSettings?.id,
-          loading,
-          careSettingsLoading,
-        });
+        // console.warn(
+        //   '[Dashboard] Loading timeout - 強制的に次の画面に進みます'
+        // );
+        // console.warn('[Dashboard] 最終状態:', {
+        //   authLoading,
+        //   currentUser: !!currentUser,
+        //   careSettingsId: careSettings?.id,
+        //   loading,
+        //   careSettingsLoading,
+        // });
 
         setLoading(false);
         setCareSettingsLoading(false);
@@ -225,7 +224,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (authLoading || !currentUser) {
       // authLoading と currentUser を使用
-      console.log('[Dashboard] 認証待ちまたは未認証のためAPIコール延期');
+      // console.log('[Dashboard] 認証待ちまたは未認証のためAPIコール延期');
       return;
     }
 
@@ -253,18 +252,18 @@ export default function DashboardPage() {
             care_start_date: data.care_start_date,
             care_end_date: data.care_end_date,
           });
-          console.log('[Dashboard] care_settings取得成功:', data);
+          // console.log('[Dashboard] care_settings取得成功:', data);
         } else if (res.status === 404) {
-          console.log(
-            '[Dashboard] care_settings が見つかりません（新規ユーザー）'
-          );
+          // console.log(
+          //   '[Dashboard] care_settings が見つかりません（新規ユーザー）'
+          // );
           // 新規ユーザーの場合、onboarding にリダイレクト
           router.push('/onboarding/welcome');
         } else {
-          console.error(`[Dashboard] care_settings取得失敗: ${res.status}`);
+          // console.error(`[Dashboard] care_settings取得失敗: ${res.status}`);
         }
       } catch (error) {
-        console.error('[Dashboard] care_settings取得エラー:', error);
+        // console.error('[Dashboard] care_settings取得エラー:', error);
       } finally {
         setCareSettingsLoading(false);
       }
@@ -307,12 +306,12 @@ export default function DashboardPage() {
             walked: data.walked,
             care_log_id: data.care_log_id || null,
           });
-          console.log('[Dashboard] 今日のcare_log取得成功:', data);
+          // console.log('[Dashboard] 今日のcare_log取得成功:', data);
         } else {
-          console.error(`[Dashboard] care_log取得失敗: ${res.status}`);
+          // console.error(`[Dashboard] care_log取得失敗: ${res.status}`);
         }
       } catch (error) {
-        console.error('[Dashboard] care_log取得エラー:', error);
+        // console.error('[Dashboard] care_log取得エラー:', error);
       } finally {
         setLoading(false);
       }
@@ -337,10 +336,10 @@ export default function DashboardPage() {
       );
       // 昨日の日付文字列を取得
       const yesterdayDateStr = jstYesterdayDate.toISOString().slice(0, 10);
-      console.log(
-        'yesterdayDateStr:jstYesterdayDate.toISOString().slice(0, 10)',
-        yesterdayDateStr
-      );
+      // console.log(
+      //   'yesterdayDateStr:jstYesterdayDate.toISOString().slice(0, 10)',
+      //   yesterdayDateStr
+      // );
 
       // お世話開始日の確認
       if (careSettings.care_start_date) {
@@ -349,9 +348,9 @@ export default function DashboardPage() {
 
         // 昨日がお世話開始日より前の場合は、リダイレクトしない
         if (yesterdayDate < careStartDate) {
-          console.log(
-            `[Dashboard] 昨日(${yesterdayDateStr})はお世話開始日(${careSettings.care_start_date})より前のため、リダイレクトしません`
-          );
+          // console.log(
+          //   `[Dashboard] 昨日(${yesterdayDateStr})はお世話開始日(${careSettings.care_start_date})より前のため、リダイレクトしません`
+          // );
           return;
         }
       }
@@ -363,17 +362,17 @@ export default function DashboardPage() {
 
         // 昨日がお世話終了日より後の場合は、リダイレクトしない
         if (yesterdayDate > careEndDate) {
-          console.log(
-            `[Dashboard] 昨日(${yesterdayDateStr})はお世話終了日(${careSettings.care_end_date})より後のため、リダイレクトしません`
-          );
+          // console.log(
+          //   `[Dashboard] 昨日(${yesterdayDateStr})はお世話終了日(${careSettings.care_end_date})より後のため、リダイレクトしません`
+          // );
           return;
         }
       }
 
       try {
-        console.log(
-          `[Dashboard] 昨日の散歩確認開始: careSettingId=${careSettings.id}, date=${yesterdayDateStr}`
-        );
+        // console.log(
+        //   `[Dashboard] 昨日の散歩確認開始: careSettingId=${careSettings.id}, date=${yesterdayDateStr}`
+        // );
 
         // Firebase 認証ヘッダーを取得
         let authHeaders: Record<string, string>;
@@ -384,7 +383,7 @@ export default function DashboardPage() {
             Authorization: `Bearer ${token}`,
           };
         } catch (authError) {
-          console.error('[Dashboard] 認証失敗:', authError);
+          // console.error('[Dashboard] 認証失敗:', authError);
           return; // 認証エラーの場合は処理を中断
         }
 
@@ -398,15 +397,14 @@ export default function DashboardPage() {
         );
 
         if (!res.ok) {
-          console.error(`[Dashboard] API 呼び出し失敗: status=${res.status}`);
+          // console.error(`[Dashboard] API 呼び出し失敗: status=${res.status}`);
 
           // 認証エラーの場合の特別な処理
           if (res.status === 401) {
-            console.error(
-              '[Dashboard] 認証エラー: Firebase token が無効または期限切れです'
-            );
-            // to-do: 必要に応じてログイン画面にリダイレクト
-            // router.push('/login');
+            // console.error(
+            //   '[Dashboard] 認証エラー: Firebase token が無効または期限切れです'
+            // );
+            router.push('/onboarding/login');
             return;
           }
 
@@ -414,29 +412,29 @@ export default function DashboardPage() {
         }
 
         const data = await res.json();
-        console.log(`[Dashboard] 後端レスポンス:`, data);
+        // console.log(`[Dashboard] レスポンス:`, data);
 
         // 昨日のcare_logが存在し、散歩が未実施の場合
         if (data && data.care_log_id && !data.walked) {
-          console.log('[Dashboard] 昨日散歩未実施のためダイアログを表示');
+          // console.log('[Dashboard] 昨日散歩未実施のためダイアログを表示');
           setShowNoCareDialog(true);
           return;
         }
 
         // 昨日のcare_logが存在しない場合は自動作成してからダイアログ表示
         if (data && !data.care_log_id && !data.walked) {
-          console.log(
-            '[Dashboard] 昨日記録なし、自動作成してからダイアログを表示'
-          );
+          // console.log(
+          //   '[Dashboard] 昨日記録なし、自動作成してからダイアログを表示'
+          // );
 
           try {
             // 既存のjstYesterdayDate変数を使用
             const yesterdayISO = jstYesterdayDate.toISOString();
 
-            console.log(
-              '[Dashboard] 昨日のcare_log自動作成開始:',
-              yesterdayISO
-            );
+            // console.log(
+            //   '[Dashboard] 昨日のcare_log自動作成開始:',
+            //   yesterdayISO
+            // );
 
             // 昨日のcare_logを作成
             const token = await getFirebaseToken();
@@ -455,35 +453,37 @@ export default function DashboardPage() {
             });
 
             if (createRes.ok) {
-              const createdData = await createRes.json();
-              console.log(
-                '[Dashboard] 昨日のcare_log自動作成成功:',
-                createdData.id
-              );
+              // const createdData = await createRes.json();
+              // console.log(
+              //   '[Dashboard] 昨日のcare_log自動作成成功:',
+              //   createdData.id
+              // );
+              await createRes.json(); // レスポンスを消費
             } else if (createRes.status === 409 || createRes.status === 400) {
               // 409エラー（既存記録）は無視
-              console.log('[Dashboard] 昨日のcare_log既存のため作成スキップ');
+              // console.log('[Dashboard] 昨日のcare_log既存のため作成スキップ');
             } else {
               // その他のエラーはログ出力
-              const errorText = await createRes.text();
-              console.error(
-                '[Dashboard] 昨日のcare_log作成失敗:',
-                createRes.status,
-                errorText
-              );
+              // const errorText = await createRes.text();
+              // console.error(
+              //   '[Dashboard] 昨日のcare_log作成失敗:',
+              //   createRes.status,
+              //   errorText
+              // );
+              await createRes.text(); // の他のエラー時もレスポンスを消費
             }
           } catch (createError) {
-            console.error(
-              '[Dashboard] 昨日のcare_log自動作成エラー:',
-              createError
-            );
+            // console.error(
+            //   '[Dashboard] 昨日のcare_log自動作成エラー:',
+            //   createError
+            // );
           }
 
           // care_log作成結果に関わらずダイアログを表示
           setShowNoCareDialog(true);
         }
       } catch (error) {
-        console.error('[Dashboard] 昨日の散歩確認エラー:', error);
+        // console.error('[Dashboard] 昨日の散歩確認エラー:', error);
       }
     };
 
@@ -548,7 +548,7 @@ export default function DashboardPage() {
       const data = await res.json();
       setCurrentMessage(data.message);
     } catch (error) {
-      console.error('犬メッセージ取得エラー:', error);
+      // console.error('犬メッセージ取得エラー:', error);
       setCurrentMessage('わん！'); // エラー時のフォールバック
     }
   }, [currentUser]);
@@ -585,7 +585,7 @@ export default function DashboardPage() {
         // 9時間（ミリ秒単位）を加算
         const jstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
 
-        console.log('JST日時:', jstDate.toISOString());
+        // console.log('JST日時:', jstDate.toISOString());
         // const today = new Date().toISOString().slice(0, 10);
         // console.log(today);
         const res = await fetch(`${API_BASE_URL}/api/care_logs/`, {
@@ -593,18 +593,19 @@ export default function DashboardPage() {
           headers,
           body: JSON.stringify({
             date: jstDate.toISOString(),
-            // date: today,
             fed_morning: missionId === 'morning-food',
             fed_night: missionId === 'evening-food',
           }),
         });
+
         if (!res.ok) {
-          const text = await res.text();
-          console.error('POST失敗', res.status, text);
+          // const text = await res.text();
+          // console.error('POST失敗', res.status, text);
+          await res.text(); // エラー詳細を消費
           throw new Error('POST失敗');
         }
         const data = await res.json();
-        console.log('POST成功', { careLogId, missionId, data });
+        // console.log('POST成功', { careLogId, missionId, data });
         careLogId = data.id;
       } else {
         // 既存の care_log を部分更新
@@ -620,18 +621,20 @@ export default function DashboardPage() {
           }
         );
         if (!resPatch.ok) {
-          const text = await resPatch.text();
-          console.error('PATCH失敗', resPatch.status, text);
+          // const text = await resPatch.text();
+          // console.error('PATCH失敗', resPatch.status, text);
+          await resPatch.text(); // エラー詳細を消費
           throw new Error('PATCH失敗');
         }
-        const dataPatch = await resPatch.json();
-        console.log('PATCH成功', { careLogId, missionId, data: dataPatch });
+        // const dataPatch = await resPatch.json();
+        // console.log('PATCH成功', { careLogId, missionId, data: dataPatch });
+        await resPatch.json(); // レスポンスを消費
       }
       // 更新後、再取得
       const now2 = new Date();
       const jstDate2 = new Date(now2.getTime() + 9 * 60 * 60 * 1000);
       const today = jstDate2.toISOString().split('T')[0];
-      console.log('today', today);
+      // console.log('today', today);
 
       const res2 = await fetch(
         `${API_BASE_URL}/api/care_logs/today?care_setting_id=${careSettings?.id}&date=${today}`,
@@ -641,11 +644,13 @@ export default function DashboardPage() {
         }
       );
       if (!res2.ok) {
-        const text = await res2.text();
-        console.error('取得後失敗', res2.status, text);
+        // const text = await res2.text();
+        // console.error('取得後失敗', res2.status, text);
+        await res2.text(); // エラー詳細を消費
+        throw new Error('取得後失敗');
       } else {
         const data2 = await res2.json();
-        console.log('取得後', data2);
+        // console.log('取得後', data2);
         setCareLog({
           fed_morning: data2.fed_morning,
           fed_night: data2.fed_night,
@@ -654,7 +659,7 @@ export default function DashboardPage() {
         });
       }
     } catch (error) {
-      console.error('お世話タスク更新エラー:', error);
+      // console.error('お世話タスク更新エラー:', error);
     }
   };
 

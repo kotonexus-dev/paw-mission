@@ -55,7 +55,7 @@ export function useCareSettings() {
       // サーバーから来たレスポンスをJSONに変換
       const data = await res.json();
 
-      console.log('useCareSettingsのfetchデータ確認:', data);
+      // console.log('useCareSettingsのfetchデータ確認:', data);
 
       // 取得したデータを画面で使えるようにstateにセット
       setCareSettings({
@@ -69,7 +69,7 @@ export function useCareSettings() {
 
       // エラーがあればここでキャッチ
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       setError('情報の取得に失敗しました');
 
       // 最後にローディング終了(読み込み終了)
@@ -83,7 +83,7 @@ export function useCareSettings() {
   // currentUserが利用可能になってから実行
   useEffect(() => {
     if (currentUser) {
-    fetchCareSettings();
+      fetchCareSettings();
     }
   }, [currentUser, fetchCareSettings]);
 

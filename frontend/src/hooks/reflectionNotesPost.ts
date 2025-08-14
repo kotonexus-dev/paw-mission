@@ -21,8 +21,8 @@ const createReflectionNote = async (content: string) => {
 
   // ユーザーのIDトークンを取得
   const token = await user.getIdToken();
-  console.log('Firebaseトークン:', token);
-  console.log('反省文の内容:', content);
+  // console.log('Firebaseトークン:', token);
+  // console.log('反省文の内容:', content);
 
   const body: ReflectionNoteCreateRequest = {
     content,
@@ -52,10 +52,10 @@ const createReflectionNote = async (content: string) => {
   try {
     // 一度だけ JSON を読み取り
     data = await res.json();
-    console.log('レスポンス内容', data);
+    // console.log('レスポンス内容', data);
     return data; // 読み取ったデータをそのまま返す
   } catch (err) {
-    console.error('JSONの読み取りに失敗しました:', err);
+    // console.error('JSONの読み取りに失敗しました:', err);
     throw new Error('サーバーから無効なレスポンスが返されました');
   }
 };

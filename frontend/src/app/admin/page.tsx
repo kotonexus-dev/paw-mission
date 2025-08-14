@@ -16,11 +16,10 @@ import {
 } from 'lucide-react';
 import { useCareSettings } from '@/hooks/useCareSettings';
 import { useCareLogs } from '@/hooks/useCareLogs';
-import { useAuth } from '@/context/AuthContext';
+// import { useAuth } from '@/context/AuthContext';
 import { getAuth, signOut } from 'firebase/auth';
 
 export default function AdminPage() {
-  // TODO_DBから取得したデータを表示するページ
   const router = useRouter();
 
   // 追加するhooksを呼ぶ
@@ -42,9 +41,8 @@ export default function AdminPage() {
   const [consecutiveDays, setConsecutiveDays] = useState<number | null>(null);
   const [targetDays, setTargetDays] = useState<number>(0);
   const [childName, setChildName] = useState<string>('');
-  const user = useAuth(); // 認証情報を取得
-
-  console.log('[AdminPage] User:', user.currentUser);
+  // const user = useAuth();
+  // console.log('[AdminPage] User:', user.currentUser);
 
   // ログアウト処理
   const handleLogout = () => {
@@ -54,8 +52,8 @@ export default function AdminPage() {
         localStorage.clear();
         router.push('/onboarding/welcome');
       })
-      .catch((error) => {
-        console.error('Firebaseログアウト失敗:', error);
+      .catch((_error) => {
+        // console.error('Firebaseログアウト失敗:', _error);
       });
   };
 
@@ -63,10 +61,10 @@ export default function AdminPage() {
   useEffect(() => {
     // careSettingsのデータが取得出来たら
     if (careSettings) {
-      console.log(
-        'adminぺージでcareSettingsのデータ取れているか:',
-        careSettings
-      );
+      // console.log(
+      // 'adminぺージでcareSettingsのデータ取れているか:',
+      // careSettings
+      // );
       setChildName(careSettings.child_name);
 
       // 簡易版の連続達成日数計算
@@ -197,8 +195,8 @@ export default function AdminPage() {
     );
   };
 
-  console.log('adminページでcareLog確認:', careLog);
-  console.log('adminページでcareSettings確認:', careSettings);
+  // console.log('adminページでcareLog確認:', careLog);
+  // console.log('adminページでcareSettings確認:', careSettings);
   return (
     <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
       <div className="w-full max-w-xs">

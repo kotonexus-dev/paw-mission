@@ -66,6 +66,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
       TESTING: "1"
+      ENABLE_CACHE: "false"
 
     steps:
       - name: Checkout repository
@@ -83,10 +84,11 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Prisma generate
+      - name: Run Prisma generate and setup database
         run: |
           source venv/bin/activate
           prisma generate
+          prisma db push --force-reset
 
       - name: Run Black (code formatting check)
         run: |
