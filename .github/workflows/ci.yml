@@ -66,6 +66,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
       TESTING: "1"
+      ENABLE_CACHE: "false"
 
     steps:
       - name: Checkout repository
