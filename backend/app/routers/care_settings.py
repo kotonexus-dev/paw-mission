@@ -75,11 +75,31 @@ async def create_care_setting(
             parent_name=care_setting.parent_name or "",
             child_name=care_setting.child_name or "",
             dog_name=care_setting.dog_name or "",
-            care_start_date=care_setting.care_start_date.date() if care_setting.care_start_date else datetime.now().date(),
-            care_end_date=care_setting.care_end_date.date() if care_setting.care_end_date else datetime.now().date(),
-            morning_meal_time=care_setting.morning_meal_time.time() if care_setting.morning_meal_time else datetime.now().time(),
-            night_meal_time=care_setting.night_meal_time.time() if care_setting.night_meal_time else datetime.now().time(),
-            walk_time=care_setting.walk_time.time() if care_setting.walk_time else datetime.now().time(),
+            care_start_date=(
+                care_setting.care_start_date.date()
+                if care_setting.care_start_date
+                else datetime.now().date()
+            ),
+            care_end_date=(
+                care_setting.care_end_date.date()
+                if care_setting.care_end_date
+                else datetime.now().date()
+            ),
+            morning_meal_time=(
+                care_setting.morning_meal_time.time()
+                if care_setting.morning_meal_time
+                else datetime.now().time()
+            ),
+            night_meal_time=(
+                care_setting.night_meal_time.time()
+                if care_setting.night_meal_time
+                else datetime.now().time()
+            ),
+            walk_time=(
+                care_setting.walk_time.time()
+                if care_setting.walk_time
+                else datetime.now().time()
+            ),
             care_password=care_setting.care_password or "",
             care_clear_status=care_setting.care_clear_status,
             created_at=care_setting.created_at or datetime.now(),
@@ -109,12 +129,6 @@ async def create_care_setting(
 async def get_my_care_setting(firebase_uid: str = Depends(verify_firebase_token)):
     """
     ログインユーザーのケア設定取得API
-
-    このAPIは以下の重要な用途で使用されます：
-    - ダッシュボードでの設定表示
-    - care_logs作成時の基準情報
-    - 設定変更の即座反映が必要
-    - 個人情報のためキャッシュは使用しない
     """
 
     try:
@@ -141,11 +155,31 @@ async def get_my_care_setting(firebase_uid: str = Depends(verify_firebase_token)
             parent_name=care_setting.parent_name or "",
             child_name=care_setting.child_name or "",
             dog_name=care_setting.dog_name or "",
-            care_start_date=care_setting.care_start_date.date() if care_setting.care_start_date else datetime.now().date(),
-            care_end_date=care_setting.care_end_date.date() if care_setting.care_end_date else datetime.now().date(),
-            morning_meal_time=care_setting.morning_meal_time.time() if care_setting.morning_meal_time else datetime.now().time(),
-            night_meal_time=care_setting.night_meal_time.time() if care_setting.night_meal_time else datetime.now().time(),
-            walk_time=care_setting.walk_time.time() if care_setting.walk_time else datetime.now().time(),
+            care_start_date=(
+                care_setting.care_start_date.date()
+                if care_setting.care_start_date
+                else datetime.now().date()
+            ),
+            care_end_date=(
+                care_setting.care_end_date.date()
+                if care_setting.care_end_date
+                else datetime.now().date()
+            ),
+            morning_meal_time=(
+                care_setting.morning_meal_time.time()
+                if care_setting.morning_meal_time
+                else datetime.now().time()
+            ),
+            night_meal_time=(
+                care_setting.night_meal_time.time()
+                if care_setting.night_meal_time
+                else datetime.now().time()
+            ),
+            walk_time=(
+                care_setting.walk_time.time()
+                if care_setting.walk_time
+                else datetime.now().time()
+            ),
         )
 
     except HTTPException:

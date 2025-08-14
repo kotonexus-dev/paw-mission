@@ -36,7 +36,7 @@ export default function WalkPage() {
 
   // GPS関連の状態管理
   const [gpsTracker] = useState(() => new GPSTracker());
-  // const [gpsStatus, setGpsStatus] = useState('準備中');
+  const [gpsStatus, setGpsStatus] = useState('準備中');
 
   // 時間フォーマット関数
   const formatTime = (seconds: number) => {
@@ -76,13 +76,6 @@ export default function WalkPage() {
 
   // 認証状態をチェックするヘルパー関数
   const isAuthenticated = (): boolean => !loading && currentUser !== null;
-
-  // 認証状態は下記のreturn文で適切に処理されるため、自動リダイレクトは不要
-  // useEffect(() => {
-  //   if (!loading && !currentUser) {
-  //     router.push('/onboarding/login');
-  //   }
-  // }, [currentUser, loading, router]);
 
   // コンポーネントマウント時にGPSTrackerを設定
   useEffect(() => {
@@ -232,7 +225,7 @@ export default function WalkPage() {
 
       if (trackingStarted) {
         // console.log('GPS追跡開始成功');
-        // setGpsStatus('GPS追跡開始');
+        setGpsStatus('GPS追跡開始');
 
         // 時間カウンタ開始
         const timer = setInterval(() => {
@@ -249,7 +242,7 @@ export default function WalkPage() {
         // GPS開始失敗の場合
         setIsWalking(false);
         // console.error('GPS初期化失敗');
-        // setGpsStatus('GPS初期化失敗');
+        setGpsStatus('GPS初期化失敗');
 
         // 許可状態に応じたエラーメッセージを表示
         let errorTitle = 'ばしょがわからないよ';
@@ -271,7 +264,7 @@ export default function WalkPage() {
     } catch (error) {
       // console.error('散歩開始エラー:', error);
       setIsWalking(false);
-      // setGpsStatus('開始エラー');
+      setGpsStatus('開始エラー');
       setDialogContent({
         title: 'えらーがおきました',
         description:
@@ -304,7 +297,7 @@ export default function WalkPage() {
     // GPS追跡停止
     gpsTracker.stopTracking();
     // console.log('GPS追跡停止');
-    // setGpsStatus('GPS停止');
+    setGpsStatus('GPS停止');
     setIsWalking(false);
 
     // 保存中であることを即座に表示
@@ -543,6 +536,11 @@ export default function WalkPage() {
                   <p className="text-center text-sm font-medium text-gray-800">
                     {isWalking ? 'おさんぽちゅう' : 'おさんぽまえ'}
                   </p>
+                  {isWalking && (
+                    <p className="text-center text-xs text-gray-600 mt-1">
+                      {gpsStatus}
+                    </p>
+                  )}
                   {/* 吹き出しの尻尾（下向き） */}
                   <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
                     <div className="w-0 h-0 border-l-4 border-r-4 border-t-6 border-transparent border-t-white" />
