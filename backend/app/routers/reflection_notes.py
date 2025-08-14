@@ -11,6 +11,10 @@ from app.schemas.reflection_notes import (
 
 from app.dependencies import verify_firebase_token
 
+# キャッシュ機能のimport
+from fastapi_cache import FastAPICache
+from fastapi_cache.decorator import cache
+
 # 反省文用のAPIルーターを作成
 reflection_notes_router = APIRouter(
     prefix="/api/reflection_notes", tags=["reflection_notes"]
@@ -55,25 +59,40 @@ async def create_reflection_note(
             }
         )
         print("作成結果:", result)
+
+        # 反省文作成後、該当ユーザーのキャッシュを即座に無効化
+        cache_key = f"reflection_notes:{firebase_uid}"
+        await FastAPICache.clear(cache_key)
+        print(f"キャッシュクリア完了: {cache_key}")
+
         return result
 
     except HTTPException:
         raise
     except Exception as e:
-        print("🔥DBエラー詳細:", e)
+        print("DBエラー詳細:", e)
         raise HTTPException(
             status_code=500, detail="DB登録時にエラーが発生しました"
         ) from e
 
 
-# 反省文の一覧取得API（保護者用）
+# 反省文の一覧取得API（保護者用）- キャッシュ機能付き
 @reflection_notes_router.get(
     "",  # エンドポイントURL
     response_model=List[ReflectionNoteResponse],
 )
+@cache(
+    expire=60,  # 1分間のキャッシュ
+    key_builder=lambda func, *args, **kwargs: f"reflection_notes:{kwargs.get('firebase_uid', 'unknown')}",
+)
 async def get_reflection_notes(firebase_uid: str = Depends(verify_firebase_token)):
     """
     反省文一覧取得API（保護者用）
+
+    キャッシュ設定:
+    - TTL: 60秒（1分間）
+    - キー: reflection_notes:{firebase_uid}
+    - 理由: 反省文は読み取り頻度が高く、書き込み頻度は低いため
     """
     try:
         # Firebase UID からユーザー取得
@@ -143,6 +162,12 @@ async def update_reflection_note(
             where={"id": note_id},
             data={"approved_by_parent": request.approved_by_parent},
         )
+
+        # 反省文更新後、該当ユーザーのキャッシュを即座に無効化
+        cache_key = f"reflection_notes:{firebase_uid}"
+        await FastAPICache.clear(cache_key)
+        print(f"キャッシュクリア完了: {cache_key}")
+
         return updated
 
     except HTTPException:
