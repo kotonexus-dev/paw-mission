@@ -109,9 +109,10 @@ print(f"キャッシュクリア完了: {cache_key}")
 ```
 
 **戦略の特徴：**
+
 - データ更新と同時に関連キャッシュを即座に削除
 - データ一貫性を確実に保持
-- 次回のGETリクエスト時に最新データを返却
+- 次回の GET リクエスト時に最新データを返却
 
 ---
 
@@ -139,25 +140,92 @@ print(f"キャッシュクリア完了: {cache_key}")
 ### 7.1 ベンチマーク方法
 
 **実装済み API のテスト：**
+
 - `/api/reflection_notes` エンドポイントのキャッシュ効果測定
-- 専用テストスクリプト（`test_cache.py`）による自動テスト
 - キャッシュヒット/ミス時のレスポンス時間比較
 - POST/PATCH 後のキャッシュ無効化動作確認
 
 **テスト手順：**
-1. 1回目 GET リクエスト（キャッシュミス）
-2. 2回目 GET リクエスト（キャッシュヒット）
-3. POST でデータ作成後の GET（キャッシュクリア確認）
-4. PATCH で承認状態更新後の GET（キャッシュクリア確認）
+
+#### 7.1.1 キャッシュヒット/ミスの動作確認
+
+1. **初回 GET リクエスト（キャッシュミス）**
+   ```bash
+   curl -X GET "http://localhost:8000/api/reflection_notes" \
+        -H "Authorization: Bearer <firebase_token>" \
+        -w "Time: %{time_total}s\n"
+   ```
+   - 期待値：300〜800ms のレスポンス時間
+   - Redis にキャッシュが作成される
+
+2. **2回目 GET リクエスト（キャッシュヒット）**
+   ```bash
+   # 同じリクエストを即座に実行
+   curl -X GET "http://localhost:8000/api/reflection_notes" \
+        -H "Authorization: Bearer <firebase_token>" \
+        -w "Time: %{time_total}s\n"
+   ```
+   - 期待値：10〜50ms のレスポンス時間（2〜10倍の高速化）
+   - Redis からキャッシュデータを返却
+
+#### 7.1.2 キャッシュ無効化の動作確認
+
+3. **POST でデータ作成後の GET（キャッシュクリア確認）**
+   ```bash
+   # 新規反省文を作成
+   curl -X POST "http://localhost:8000/api/reflection_notes" \
+        -H "Authorization: Bearer <firebase_token>" \
+        -H "Content-Type: application/json" \
+        -d '{"content": "テスト反省文", "care_log_id": 1}'
+   
+   # 即座に GET リクエスト（キャッシュがクリアされているか確認）
+   curl -X GET "http://localhost:8000/api/reflection_notes" \
+        -H "Authorization: Bearer <firebase_token>" \
+        -w "Time: %{time_total}s\n"
+   ```
+   - 期待値：新規作成されたデータが含まれるレスポンス
+   - レスポンス時間は初回同様（300〜800ms）
+
+4. **PATCH で承認状態更新後の GET（キャッシュクリア確認）**
+   ```bash
+   # 反省文の承認状態を更新
+   curl -X PATCH "http://localhost:8000/api/reflection_notes/1" \
+        -H "Authorization: Bearer <firebase_token>" \
+        -H "Content-Type: application/json" \
+        -d '{"is_approved": true}'
+   
+   # 即座に GET リクエスト（キャッシュがクリアされているか確認）
+   curl -X GET "http://localhost:8000/api/reflection_notes" \
+        -H "Authorization: Bearer <firebase_token>" \
+        -w "Time: %{time_total}s\n"
+   ```
+   - 期待値：承認状態が更新されたデータを返却
+   - レスポンス時間は初回同様（300〜800ms）
+
+#### 7.1.3 Redis での確認方法
+
+```bash
+# Redis CLI でキャッシュキーの確認
+docker exec -it <redis_container_name> redis-cli
+
+# キャッシュキーの存在確認
+KEYS "reflection_notes:*"
+
+# TTL の確認
+TTL "reflection_notes:<firebase_uid>"
+
+# キャッシュデータの確認
+GET "reflection_notes:<firebase_uid>"
+```
 
 ### 7.2 効果測定指標
 
-| 指標                 | 測定対象                        | 期待値                        | 実装状況                                      |
-| -------------------- | ------------------------------- | ----------------------------- | --------------------------------------------- |
-| 平均レスポンスタイム | `/api/reflection_notes`         | キャッシュヒット時 10-50ms    | テストスクリプトで測定可能                    |
-| キャッシュ効果       | 2回目リクエストの速度向上       | 初回比 2-10倍高速化           | `test_cache.py` で自動計測                    |
-| データ一貫性         | POST/PATCH後のキャッシュクリア  | 即座に最新データを返却        | ✅ 実装完了・ログで確認可能                   |
-| Redis 動作確認       | キャッシュキーの TTL 管理       | 60秒で自動削除                | Redis CLI で `TTL` コマンドで確認可能         |
+| 指標                 | 測定対象                        | 期待値                     | 実装状況                              |
+| -------------------- | ------------------------------- | -------------------------- | ------------------------------------- |
+| 平均レスポンスタイム | `/api/reflection_notes`         | キャッシュヒット時 10-50ms | 手動テストで測定可能                  |
+| キャッシュ効果       | 2 回目リクエストの速度向上      | 初回比 2-10 倍高速化       | 手動テストで計測                      |
+| データ一貫性         | POST/PATCH 後のキャッシュクリア | 即座に最新データを返却     | ✅ 実装完了・ログで確認可能           |
+| Redis 動作確認       | キャッシュキーの TTL 管理       | 60 秒で自動削除            | Redis CLI で `TTL` コマンドで確認可能 |
 
 ---
 
