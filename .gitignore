@@ -3,10 +3,11 @@
 **/venv/
 **/.venv/
 
-# Environment
+# Environment variables
 **/.env
 **/.env.*
-!**/.env.example
+!**/.env.sample
+!**/.env.local.sample
 
 # Python
 **/__pycache__/
@@ -15,31 +16,31 @@
 
 # Database
 **/db-data/
-**/generated/prisma
 **/*.sqlite
 **/*.db
+
+# Prisma
+**/generated/prisma
+**/generated/client
+**/backend/prisma/prisma
+**/backend/prisma/prisma-client
 
 # Build outputs
 **/.next/
 **/build/
 **/dist/
+**/.swc
+
+# TypeScript
+**/*.tsbuildinfo
 
 # Firebase
 **/serviceAccountKey.json
 **/.service-account.json
 **/.firebase.json
 **/.adminsdk.json
-
-# TypeScript build cache
-**/*.tsbuildinfo
-
-# IDE
-**/.vscode/
-
-# OS generated
-**/.DS_Store
-**/*.pem
-**/Thumbs.db
+**/wan-mission-firebase-adminsdk-fbsvc-b24aa18832.json
+**/my-paw-mission-firebase-adminsdk-fbsvc-3e97fe0294.json
 
 # Testing
 **/coverage/
@@ -48,17 +49,28 @@
 **/coverage.lcov
 **/coverage-integration/
 
-# prisma
-**/generated/client
-**/backend/prisma/prisma
-**/backend/prisma/prisma-client
-
-# Firebase Admin SDK
-**/wan-mission-firebase-adminsdk-fbsvc-b24aa18832.json
-**/my-paw-mission-firebase-adminsdk-fbsvc-3e97fe0294.json
-
-# monitoring
+# Monitoring
 **/alertmanager.yml
 
-**/.swc
+# Terraform
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfplan
+**/*.tfplan.*
+**/.terraform/
+**/.terraform.lock.hcl
+**/*.tfvars
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json
+**/.terraformrc
+**/terraform.rc
 
+# IDE
+**/.vscode/
+
+# OS generated files
+**/.DS_Store
+**/*.pem
+**/Thumbs.db
