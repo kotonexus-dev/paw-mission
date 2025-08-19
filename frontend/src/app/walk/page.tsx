@@ -35,8 +35,15 @@ export default function WalkPage() {
   const [isSaving, setIsSaving] = useState(false); // 保存中フラグ
 
   // GPS関連の状態管理
-  const [gpsTracker] = useState(() => new GPSTracker());
-  const [gpsStatus, setGpsStatus] = useState('準備中');
+  const [gpsTracker, setGpsTracker] = useState<GPSTracker | null>(null);
+  const [gpsStatus, setGpsStatus] = useState('preparing...');
+
+  // クライアントサイドでのみGPSTrackerを初期化
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setGpsTracker(new GPSTracker());
+    }
+  }, []);
 
   // 時間フォーマット関数
   const formatTime = (seconds: number) => {
@@ -79,6 +86,8 @@ export default function WalkPage() {
 
   // コンポーネントマウント時にGPSTrackerを設定
   useEffect(() => {
+    if (!gpsTracker) return;
+
     // 距離更新コールバック設定
     gpsTracker.setDistanceCallback((distance: number) => {
       setWalkDistance(distance);
@@ -87,14 +96,14 @@ export default function WalkPage() {
     // エラーコールバック設定
     gpsTracker.setErrorCallback((error: string) => {
       // console.error('GPS エラー:', error);
-      // setGpsStatus(`エラー: ${error}`);
+      setGpsStatus(`えらー: ${error}`);
 
       // エラーメッセージを日本語に変換
       let userFriendlyMessage = '';
-      if (error.includes('位置情報の許可が拒否されました')) {
+      if (error.includes('いちじょうほうのきょかがきょひされました')) {
         userFriendlyMessage =
           'ばしょのじょうほうの きょかを おねがいします。\n\nせっていがめん → ぷらいばしー → ばしょのじょうほう → このあぷりをONにしてね！';
-      } else if (error.includes('位置情報が利用できません')) {
+      } else if (error.includes('いちじょうほうがりようできません')) {
         userFriendlyMessage =
           'ばしょのじょうほうが つかえません。\n\n【かいけつほうほう】\n1. そとやおにわに でてみてね\n2. でんわのせっていで「ばしょさーびす」をONにしてね\n3. ぶらうざのせっていで「ばしょのきょか」をONにしてね\n4. Wi-Fiをきって、もばいるでーたにしてみてね\n5. ぶらうざのきゃっしゅをくりあしてみてね\n\n※しつないや ビルのなかでは GPSが つかいにくいです';
       } else if (error.includes('タイムアウト')) {
@@ -122,12 +131,12 @@ export default function WalkPage() {
     // 位置更新コールバック設定
     gpsTracker.setPositionCallback((position) => {
       // console.log(`GPS精度: ${position.accuracy.toFixed(1)}m`);
-      setGpsStatus(`GPS精度: ${position.accuracy.toFixed(1)}m`);
+      setGpsStatus(`GPSせいど: ${position.accuracy.toFixed(1)}m`);
     });
 
     return () => {
       // クリーンアップ
-      if (gpsTracker.isTracking()) {
+      if (gpsTracker?.isTracking()) {
         gpsTracker.stopTracking();
       }
     };
@@ -179,7 +188,7 @@ export default function WalkPage() {
     setIsWalking(true);
     setWalkTime(0);
     setWalkDistance(0);
-    // setGpsStatus('GPS初期化中...');
+    setGpsStatus('GPSしょきかちゅう...');
 
     try {
       // 事前に位置情報の許可状態をチェック（参考情報として）
@@ -221,11 +230,14 @@ export default function WalkPage() {
 
       // GPS追跡開始（許可状態に関わらず試行）
       // console.log('GPS追跡開始準備中...');
+      if (!gpsTracker) {
+        throw new Error('GPS Tracker not initialized');
+      }
       const trackingStarted = await gpsTracker.startTracking();
 
       if (trackingStarted) {
         // console.log('GPS追跡開始成功');
-        setGpsStatus('GPS追跡開始');
+        setGpsStatus('GPSついせきかいし');
 
         // 時間カウンタ開始
         const timer = setInterval(() => {
@@ -242,7 +254,7 @@ export default function WalkPage() {
         // GPS開始失敗の場合
         setIsWalking(false);
         // console.error('GPS初期化失敗');
-        setGpsStatus('GPS初期化失敗');
+        setGpsStatus('GPSしょきかしっぱい');
 
         // 許可状態に応じたエラーメッセージを表示
         let errorTitle = 'ばしょがわからないよ';
@@ -264,7 +276,7 @@ export default function WalkPage() {
     } catch (error) {
       // console.error('散歩開始エラー:', error);
       setIsWalking(false);
-      setGpsStatus('開始エラー');
+      setGpsStatus('かいしえらー');
       setDialogContent({
         title: 'えらーがおきました',
         description:
@@ -295,9 +307,11 @@ export default function WalkPage() {
     }
 
     // GPS追跡停止
-    gpsTracker.stopTracking();
-    // console.log('GPS追跡停止');
-    setGpsStatus('GPS停止');
+    if (gpsTracker) {
+      gpsTracker.stopTracking();
+      // console.log('GPS追跡停止');
+      setGpsStatus('GPSていし');
+    }
     setIsWalking(false);
 
     // 保存中であることを即座に表示
@@ -418,7 +432,7 @@ export default function WalkPage() {
       if (walkTimer) {
         clearInterval(walkTimer);
       }
-      if (gpsTracker.isTracking()) {
+      if (gpsTracker?.isTracking()) {
         gpsTracker.stopTracking();
       }
     },
@@ -537,7 +551,7 @@ export default function WalkPage() {
                     {isWalking ? 'おさんぽちゅう' : 'おさんぽまえ'}
                   </p>
                   {isWalking && (
-                    <p className="text-center text-xs text-gray-600 mt-1">
+                    <p className="text-center text-xs text-gray-300 mt-1">
                       {gpsStatus}
                     </p>
                   )}
