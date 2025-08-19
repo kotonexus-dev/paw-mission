@@ -1,0 +1,38 @@
+# プロジェクト基本設定
+project_name = "paw_mission"
+aws_region   = "ap-northeast-1"
+availability_zone = "ap-northeast-1a"
+
+# データベース設定
+database_name     = "paw_mission_db"
+database_username = "paw_user"
+database_password = "CHANGE_ME_SECURE_PASSWORD"  # 必ず変更すること
+
+# コンテナイメージ（実際のAWSアカウントIDに置き換えてください）
+frontend_image_uri = "YOUR_ACCOUNT_ID.dkr.ecr.ap-northeast-1.amazonaws.com/paw_mission/frontend"
+backend_image_uri  = "YOUR_ACCOUNT_ID.dkr.ecr.ap-northeast-1.amazonaws.com/paw_mission/backend"
+
+# 外部APIキー
+openai_api_key     = "your-openai-api-key"
+stripe_secret_key  = "your-stripe-secret-key"
+stripe_price_id    = "your-stripe-price-id"
+
+# Firebase設定
+firebase_api_key         = "your-firebase-api-key"
+firebase_auth_domain     = "your-project.firebaseapp.com"
+firebase_project_id      = "your-project-id"
+firebase_messaging_sender_id = "your-sender-id"
+firebase_app_id          = "your-app-id"
+firebase_service_account = "path/to/serviceAccountKey.json"
+
+# ドメイン設定
+domain_name = "your-domain.com"
+your_domain = "https://your-domain.com"
+allowed_origins = "https://your-domain.com,http://localhost:3000"
+
+# backend
+next_public_api_url = "https://your-backend-domain.com/api"
+
+# S3設定（静的ファイル用）
+next_public_s3_bucket_url = "https://your-bucket.s3.amazonaws.com"
+

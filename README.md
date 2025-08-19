@@ -81,6 +81,21 @@
 
 _システム全体の構成と各コンポーネントの関係を示したアーキテクチャー図_
 
+### AWS 本番環境アーキテクチャー（2025年8月19日更新）
+
+![AWSアーキテクチャー図](./docs/AWS-paw-mission-architecture.png)
+
+_AWS上での3層アーキテクチャー構成図_
+
+**特徴**：
+- **ECS Fargate** による サーバーレスコンテナ実行環境
+- **3層セキュリティ設計** (Web層 → App層 → DB層)
+- **SSL/TLS** 対応による HTTPS 通信
+- **Infrastructure as Code** (Terraform) による構成管理
+
+Terraform を用いたエンタープライズレベルのクラウドアーキテクチャーを実装。
+詳細な設計思想と選定理由は [`docs/AWS_deploy_design.md`](./docs/AWS_deploy_design.md) をご参照ください。
+
 ## ディレクトリ構成
 
 ```bash
@@ -292,18 +307,21 @@ npm run test
 本プロジェクトでは、レスポンス性能の向上と DB 負荷の軽減を目的に、FastAPI に Redis キャッシュを導入しています。
 
 **実装状況：**
-- **適用API：** `/api/reflection_notes` （反省文一覧取得）
+
+- **適用 API：** `/api/reflection_notes` （反省文一覧取得）
 - **キャッシュ戦略：** Cache-Aside Pattern + Write-Through Invalidation
-- **TTL設定：** 60秒（適度な期間でデータ鮮度とパフォーマンスを両立）
+- **TTL 設定：** 60 秒（適度な期間でデータ鮮度とパフォーマンスを両立）
 - **キー設計：** `reflection_notes:{firebase_uid}` （ユーザー固有）
-- **無効化タイミング：** POST/PATCH操作後の即座なキャッシュクリア
+- **無効化タイミング：** POST/PATCH 操作後の即座なキャッシュクリア
 
 **選択理由：**
+
 - 反省文は読み取り頻度が高く、書き込み頻度は低い特性
 - 子どもの反省文作成後、保護者が即座に確認できる必要性
 - ビジネスロジックへの影響が比較的少ない安全な領域
 
 **効果測定：**
+
 - FastAPI Exporter、Redis Exporter、PostgreSQL Exporter を通じて Prometheus にて メトリクス収集 & Grafana で可視化
 - Grafana では、CPU 使用率やメモリ負荷、Redis ヒット率などをリアルタイムで監視可能
 - キャッシュヒット時のレスポンス時間短縮を測定
