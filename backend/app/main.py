@@ -94,6 +94,13 @@ async def read_root():
     return {"message": "Hello from FastAPI!"}
 
 
+# ヘルスチェック用エンドポイント（ALB用）
+@app.get("/health")
+async def health_check():
+    """ALB ヘルスチェック用エンドポイント"""
+    return {"status": "healthy"}
+
+
 # メトリクス収集器の初期化と有効化
 Instrumentator().instrument(app).expose(app)
 

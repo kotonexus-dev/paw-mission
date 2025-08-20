@@ -71,6 +71,7 @@ terraform apply
 - **terraform.tfvars を Git にコミットしない**
 - `.gitignore` に `terraform.tfvars` を追加済み
 - API キーやパスワードは安全に管理
+
 - **AWS_ACCOUNT_ID は環境変数で設定し、スクリプトに直接記載しない**
 
 ### 環境変数での安全な設定
