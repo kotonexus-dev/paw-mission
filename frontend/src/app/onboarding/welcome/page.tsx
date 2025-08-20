@@ -28,13 +28,16 @@ export default function WelcomePage() {
           </p>
           <div className="py-3 sm:py-4 flex justify-center">
             <div className="relative w-40 h-40 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-full overflow-hidden bg-white shadow">
-              {/* <div className="relative w-40 h-40 sm:w-56 sm:h-56 md:w-64 md:h-64 pet-bag-container"> */}
               <Image
-                src="/images/dog-house.jpg"
+                src="/images/dog-house-optimized.jpg"
                 alt="ワンちゃんの家"
                 fill
                 style={{ objectFit: 'cover' }}
                 priority
+                sizes="(max-width: 640px) 160px, (max-width: 768px) 224px, 256px"
+                quality={85}
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
               />
             </div>
           </div>
