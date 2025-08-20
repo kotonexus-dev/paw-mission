@@ -1,0 +1,53 @@
+# プロジェクト基本設定
+project_name = "your-project-name"
+aws_region   = "ap-northeast-1"
+availability_zone = "ap-northeast-1a"
+aws_account_id = "YOUR_AWS_ACCOUNT_ID"
+
+# データベース設定
+database_name     = "your_db_name"
+database_username = "your_db_user"
+database_password = "your_secure_password"
+DATABASE_URL = "postgresql://your_db_user:your_secure_password@your-db-endpoint.region.rds.amazonaws.com:5432/your_db_name"
+
+# コンテナイメージ（実際のAWSアカウントIDに置き換えてください）
+frontend_image_uri = "YOUR_AWS_ACCOUNT_ID.dkr.ecr.ap-northeast-1.amazonaws.com/your-frontend:latest"
+backend_image_uri  = "YOUR_AWS_ACCOUNT_ID.dkr.ecr.ap-northeast-1.amazonaws.com/your-backend:latest"
+
+# 外部APIキー
+openai_api_key     = "your_openai_api_key"
+stripe_secret_key  = "your_stripe_secret_key"
+stripe_price_id    = "your_stripe_price_id"
+
+# Firebase設定
+firebase_api_key         = "your_firebase_api_key"
+firebase_auth_domain     = "your-project.firebaseapp.com"
+firebase_project_id      = "your-firebase-project-id"
+firebase_messaging_sender_id = "your_messaging_sender_id"
+firebase_app_id          = "your_firebase_app_id"
+firebase_service_account = <<EOF
+{
+  "type": "service_account",
+  "project_id": "your-firebase-project-id",
+  "private_key_id": "your_private_key_id",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.com",
+  "client_id": "your_client_id",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-xxxxx%40your-project.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
+EOF
+
+# ドメイン設定
+domain_name = "your-domain.com"
+your_domain = "https://your-domain.com"
+allowed_origins = "https://your-domain.com,http://localhost:3000"
+
+# backend api url
+next_public_api_url = "https://your-domain.com/api"
+
+# S3設定（静的ファイル用）
+next_public_s3_bucket_url = "https://your-s3-bucket.s3.ap-northeast-1.amazonaws.com"
