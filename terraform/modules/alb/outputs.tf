@@ -27,3 +27,8 @@ output "backend_target_group_arn" {
   description = "ARN of the backend target group"
   value       = aws_lb_target_group.backend.arn
 }
+
+output "ssl_certificate_arn" {
+  description = "ARN of the SSL certificate"
+  value       = aws_acm_certificate_validation.main.certificate_arn
+}

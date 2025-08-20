@@ -21,19 +21,30 @@ cp terraform.tfvars.example terraform.tfvars
 vi terraform.tfvars
 ```
 
-### 2. デプロイ
+### 2. Docker イメージのビルドと ECR プッシュ
 
 ```bash
-# Terraformディレクトリに移動
-cd terraform
+# ビルドスクリプトを実行可能にする
+chmod +x build-and-deploy.sh
 
+# 環境変数を設定
+export AWS_ACCOUNT_ID="your_account_id"
+export AWS_REGION="ap-northeast-1"
+
+# Docker イメージをビルドして ECR にプッシュ
+./build-and-deploy.sh
+```
+
+### 3. インフラのデプロイ
+
+```bash
 # 初期化（初回のみ）
 terraform init
 
-# プラン確認
+# 必ず変更内容を確認
 terraform plan
 
-# デプロイ実行
+# 問題がなければデプロイ実行
 terraform apply
 ```
 
@@ -60,6 +71,19 @@ terraform apply
 - **terraform.tfvars を Git にコミットしない**
 - `.gitignore` に `terraform.tfvars` を追加済み
 - API キーやパスワードは安全に管理
+
+- **AWS_ACCOUNT_ID は環境変数で設定し、スクリプトに直接記載しない**
+
+### 環境変数での安全な設定
+
+```bash
+# ~/.bashrc または ~/.zshrc に追加
+export AWS_ACCOUNT_ID="123456789012"
+export AWS_REGION="ap-northeast-1"
+
+# または実行時に設定
+AWS_ACCOUNT_ID=123456789012 ./build-and-deploy.sh
+```
 
 ## 📝 ローカル State 管理
 

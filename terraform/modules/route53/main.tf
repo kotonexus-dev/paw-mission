@@ -7,28 +7,29 @@ resource "aws_route53_zone" "main" {
   }
 }
 
-# A record pointing to ALB
+
+# A record pointing to CloudFront (if provided), otherwise ALB
 resource "aws_route53_record" "main" {
   zone_id = aws_route53_zone.main.zone_id
   name    = var.domain_name
   type    = "A"
 
   alias {
-    name                   = var.alb_dns_name
-    zone_id                = var.alb_zone_id
-    evaluate_target_health = true
+    name                   = var.cloudfront_dns_name != "" ? var.cloudfront_dns_name : var.alb_dns_name
+    zone_id                = var.cloudfront_dns_name != "" ? var.cloudfront_zone_id : var.alb_zone_id
+    evaluate_target_health = false  # CloudFront doesn't support health checks
   }
 }
 
-# WWW subdomain pointing to ALB
+# WWW subdomain pointing to CloudFront (if provided), otherwise ALB
 resource "aws_route53_record" "www" {
   zone_id = aws_route53_zone.main.zone_id
   name    = "www.${var.domain_name}"
   type    = "A"
 
   alias {
-    name                   = var.alb_dns_name
-    zone_id                = var.alb_zone_id
-    evaluate_target_health = true
+    name                   = var.cloudfront_dns_name != "" ? var.cloudfront_dns_name : var.alb_dns_name
+    zone_id                = var.cloudfront_dns_name != "" ? var.cloudfront_zone_id : var.alb_zone_id
+    evaluate_target_health = false  # CloudFront doesn't support health checks
   }
 }

@@ -44,10 +44,12 @@ module "security" {
 module "route53" {
   source = "./modules/route53"
   
-  project_name  = var.project_name
-  domain_name   = var.domain_name
-  alb_dns_name  = module.alb.alb_dns_name
-  alb_zone_id   = module.alb.alb_zone_id
+  project_name         = var.project_name
+  domain_name          = var.domain_name
+  alb_dns_name         = module.alb.alb_dns_name
+  alb_zone_id          = module.alb.alb_zone_id
+  cloudfront_dns_name  = module.cloudfront.cloudfront_domain_name
+  cloudfront_zone_id   = module.cloudfront.cloudfront_hosted_zone_id
 }
 
 # ALB module
@@ -104,4 +106,14 @@ module "rds" {
   database_password      = var.database_password
   db_subnet_group_name   = module.network.db_subnet_group_name
   rds_security_group_id  = module.security.rds_security_group_id
+}
+
+# CloudFront module
+module "cloudfront" {
+  source = "./modules/cloudfront"
+  
+  project_name         = var.project_name
+  domain_name          = var.domain_name
+  alb_dns_name         = module.alb.alb_dns_name
+  ssl_certificate_arn  = module.alb.ssl_certificate_arn
 }

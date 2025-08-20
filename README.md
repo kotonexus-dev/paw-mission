@@ -94,7 +94,9 @@ _AWS上での3層アーキテクチャー構成図_
 - **Infrastructure as Code** (Terraform) による構成管理
 
 Terraform を用いたエンタープライズレベルのクラウドアーキテクチャーを実装。
-詳細な設計思想と選定理由は [`docs/AWS_deploy_design.md`](./docs/AWS_deploy_design.md) をご参照ください。
+詳細な設計思想と選定理由については以下のドキュメントを参照してください：
+- [AWS デプロイ設計書](docs/AWS_deploy_design.md)
+- [Terraform 設定ガイド](terraform/README.md)
 
 ## ディレクトリ構成
 
@@ -104,7 +106,8 @@ Terraform を用いたエンタープライズレベルのクラウドアーキ�
 ├── backend/    # FastAPI バックエンド
 ├── frontend/   # Next.js フロントエンド
 ├── docs/       # ドキュメンテーション関連
-├── monitoring/　# Prometheus・Grafana等の監視設定
+├── monitoring/ # Prometheus・Grafana等の監視設定
+├── terraform/  # Terraformの設定
 ├── docker-compose.yml
 ├── README.md
 └── ...
