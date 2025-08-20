@@ -1,8 +1,19 @@
-FROM node:18
+# Multi-stage build for production
+FROM node:18-alpine AS base
 
+# Install dependencies only when needed
+FROM base AS deps
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Rebuild the source code only when needed
+FROM base AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 COPY . .
 
 # Define build-time arguments for Next.js public environment variables
@@ -50,4 +61,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 
 EXPOSE 3000
-CMD ["npm", "run", "dev"]
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Health check for ALB
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/ || exit 1
+
+CMD ["node", "server.js"]

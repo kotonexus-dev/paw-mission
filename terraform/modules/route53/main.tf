@@ -7,6 +7,7 @@ resource "aws_route53_zone" "main" {
   }
 }
 
+
 # A record pointing to CloudFront (if provided), otherwise ALB
 resource "aws_route53_record" "main" {
   zone_id = aws_route53_zone.main.zone_id

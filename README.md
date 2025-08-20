@@ -81,13 +81,20 @@
 
 _システム全体の構成と各コンポーネントの関係を示したアーキテクチャー図_
 
-## AWS アーキテクチャー
+### AWS 本番環境アーキテクチャー（2025年8月19日更新）
 
-![AWS アーキテクチャー図](./docs/AWS-paw-mission-architecture.png)
+![AWSアーキテクチャー図](./docs/AWS-paw-mission-architecture.png)
 
-_AWS上でのシステム構成とデプロイメント構造を示したアーキテクチャー図_
+_AWS上での3層アーキテクチャー構成図_
 
-詳細な設計については以下のドキュメントを参照してください：
+**特徴**：
+- **ECS Fargate** による サーバーレスコンテナ実行環境
+- **3層セキュリティ設計** (Web層 → App層 → DB層)
+- **SSL/TLS** 対応による HTTPS 通信
+- **Infrastructure as Code** (Terraform) による構成管理
+
+Terraform を用いたエンタープライズレベルのクラウドアーキテクチャーを実装。
+詳細な設計思想と選定理由については以下のドキュメントを参照してください：
 - [AWS デプロイ設計書](docs/AWS_deploy_design.md)
 - [Terraform 設定ガイド](terraform/README.md)
 
