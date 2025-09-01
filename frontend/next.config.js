@@ -16,12 +16,6 @@ const nextConfig = {
   },
   // Enable compression
   compress: true,
-  // Performance optimizations
-  swcMinify: true,
-  experimental: {
-    // Enable modern bundling features
-    optimizeCss: true,
-  },
 };
 
 module.exports = nextConfig;

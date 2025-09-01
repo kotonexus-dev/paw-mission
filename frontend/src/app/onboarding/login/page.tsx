@@ -2,7 +2,7 @@
 
 import type React from 'react';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,7 +30,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config'; // Firebase初期化モジュールを作成しておく
-// import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
 // ローディング状態のタイプ定義
 type LoadingStep = 'idle' | 'firebase' | 'token' | 'database' | 'redirect';
@@ -44,9 +44,14 @@ export default function OnboardingLoginPage() {
   const [password, setPassword] = useState('');
   const [loadingStep, setLoadingStep] = useState<LoadingStep>('idle'); // ローディング状態管理
   const [error, setError] = useState(''); // エラーメッセージ表示用
-  // const user = useAuth();
+  const { currentUser, loading: authLoading } = useAuth();
 
-  // console.log('[OnboardingLoginPage] User:', user.currentUser);
+  // ログイン済みなら/dashboardへリダイレクト
+  useEffect(() => {
+    if (!authLoading && currentUser && loadingStep === 'idle') {
+      router.push('/dashboard');
+    }
+  }, [authLoading, currentUser, router, loadingStep]);
 
   // ローディングステップのテキスト取得
   const getLoadingText = (step: LoadingStep) => {

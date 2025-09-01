@@ -15,18 +15,18 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useCareSettings } from '@/hooks/useCareSettings';
 import useCurrentUser from '@/hooks/useCurrentUser';
-// import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function UserInfoPage() {
   const router = useRouter();
-  // const user = useAuth();
-  // console.log('[UserInfoPage] User:', user.currentUser);
+  const { currentUser, loading: authLoading } = useAuth();
+  
   // hooksから取得
   const { careSettings, loading, error, refetch } = useCareSettings();
 
   // プレミアム会員状態をチェック
   const {
-    user: currentUser,
+    user: userInfo,
     loading: userLoading,
     error: userError,
   } = useCurrentUser();
@@ -45,6 +45,24 @@ export default function UserInfoPage() {
       return dateString;
     }
   };
+
+  // 認証ローディング中は早期リターン
+  if (authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4" />
+          <p className="text-orange-600">認証確認中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 未認証の場合は welcome に遷移して早期リターン
+  if (!currentUser) {
+    router.push('/onboarding/welcome');
+    return null;
+  }
 
   // ローディング中
   if (loading || userLoading) {
@@ -138,7 +156,7 @@ export default function UserInfoPage() {
                   </span>
                 </div>
                 <div className="flex items-center ml-2">
-                  {currentUser?.current_plan === 'premium' ? (
+                  {userInfo?.current_plan === 'premium' ? (
                     <Badge className="bg-yellow-500 text-white px-2 py-1 text-xs whitespace-nowrap">
                       <Crown className="mr-1 h-2 w-3" />
                       プレミアム会員

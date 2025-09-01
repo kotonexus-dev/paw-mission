@@ -2,6 +2,7 @@
 
 # このスクリプトは Docker イメージをビルドして ECR にプッシュします
 # 実行前に AWS CLI と Docker が設定されていることを確認してください
+# 注意: このスクリプトは手動実行用です。GitHub Actionsでは自動的に実行されます。
 
 set -e  # エラーが発生したら終了
 
@@ -29,6 +30,19 @@ else
     exit 1
 fi
 
+# Terraform を実行してECRリポジトリを確保
+echo "Terraform を実行してECRリポジトリを作成/更新中..."
+terraform init -upgrade
+terraform plan -target=module.ecr
+terraform apply -target=module.ecr -auto-approve
+
+# ECRリポジトリURLを取得
+FRONTEND_ECR_URL=$(terraform output -raw frontend_ecr_repository_url)
+BACKEND_ECR_URL=$(terraform output -raw backend_ecr_repository_url)
+
+echo "Frontend ECR URL: $FRONTEND_ECR_URL"
+echo "Backend ECR URL: $BACKEND_ECR_URL"
+
 # ECR ログイン
 echo "AWS ECR にログイン中..."
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
@@ -44,21 +58,21 @@ docker build \
   --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="$firebase_messaging_sender_id" \
   --build-arg NEXT_PUBLIC_FIREBASE_APP_ID="$firebase_app_id" \
   --build-arg NEXT_PUBLIC_S3_BUCKET_URL="$next_public_s3_bucket_url" \
-  -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$PROJECT_NAME-frontend:latest \
+  -t $FRONTEND_ECR_URL:latest \
   ../frontend
 
 # バックエンドイメージのビルド
 echo "バックエンドイメージをビルド中..."
 docker build \
-  -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$PROJECT_NAME-backend:latest \
+  -t $BACKEND_ECR_URL:latest \
   ../backend
 
 # イメージを ECR にプッシュ
 echo "フロントエンドイメージを ECR にプッシュ中..."
-docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$PROJECT_NAME-frontend:latest
+docker push $FRONTEND_ECR_URL:latest
 
 echo "バックエンドイメージを ECR にプッシュ中..."
-docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$PROJECT_NAME-backend:latest
+docker push $BACKEND_ECR_URL:latest
 
 echo "✅ イメージのビルドとプッシュが完了しました！"
 echo ""

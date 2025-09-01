@@ -16,11 +16,25 @@ provider "aws" {
   region = var.aws_region
 }
 
+# Provider for us-east-1 (required for CloudFront certificates)
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+}
+
 # Random string for unique resource naming
 resource "random_string" "bucket_suffix" {
   length  = 8
   special = false
   upper   = false
+}
+
+# ECR repositories
+module "ecr" {
+  source = "./modules/ecr"
+  
+  project_name = var.project_name
+  aws_region   = var.aws_region
 }
 
 # Network module
@@ -40,17 +54,17 @@ module "security" {
   vpc_id       = module.network.vpc_id
 }
 
-# Route 53 module
-module "route53" {
-  source = "./modules/route53"
-  
-  project_name         = var.project_name
-  domain_name          = var.domain_name
-  alb_dns_name         = module.alb.alb_dns_name
-  alb_zone_id          = module.alb.alb_zone_id
-  cloudfront_dns_name  = module.cloudfront.cloudfront_domain_name
-  cloudfront_zone_id   = module.cloudfront.cloudfront_hosted_zone_id
-}
+# Route 53 module - disabled for CloudFront default domain setup
+# module "route53" {
+#   source = "./modules/route53"
+#   
+#   project_name         = var.project_name
+#   domain_name          = var.domain_name
+#   alb_dns_name         = module.alb.alb_dns_name
+#   alb_zone_id          = module.alb.alb_zone_id
+#   cloudfront_dns_name  = module.cloudfront.cloudfront_domain_name
+#   cloudfront_zone_id   = module.cloudfront.cloudfront_hosted_zone_id
+# }
 
 # ALB module
 module "alb" {
@@ -60,8 +74,7 @@ module "alb" {
   vpc_id                   = module.network.vpc_id
   public_subnet_ids        = module.network.public_subnet_ids
   alb_security_group_id    = module.security.alb_security_group_id
-  domain_name              = var.domain_name
-  hosted_zone_id           = module.route53.hosted_zone_id
+  # domain_name and hosted_zone_id removed for CloudFront default domain setup
 }
 
 # ECS module
@@ -78,13 +91,18 @@ module "ecs" {
   frontend_target_group_arn      = module.alb.frontend_target_group_arn
   backend_target_group_arn       = module.alb.backend_target_group_arn
   
+  # Container Images from ECR
+  frontend_image_uri             = module.ecr.frontend_image_uri
+  backend_image_uri              = module.ecr.backend_image_uri
+  
   # Environment Variables
   database_url                   = "postgresql://${var.database_username}:${var.database_password}@${module.rds.db_instance_endpoint}/${var.database_name}"
   allowed_origins                = var.allowed_origins
   openai_api_key                 = var.openai_api_key
   stripe_secret_key              = var.stripe_secret_key
   stripe_price_id                = var.stripe_price_id
-  next_public_api_url            = var.next_public_api_url
+  your_domain                    = var.your_domain
+  next_public_api_url            = "https://${module.cloudfront.cloudfront_domain_name}/api"
   next_public_s3_bucket_url      = var.next_public_s3_bucket_url
   firebase_api_key               = var.firebase_api_key
   firebase_auth_domain           = var.firebase_auth_domain
@@ -112,8 +130,11 @@ module "rds" {
 module "cloudfront" {
   source = "./modules/cloudfront"
   
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
+  
   project_name         = var.project_name
-  domain_name          = var.domain_name
   alb_dns_name         = module.alb.alb_dns_name
-  ssl_certificate_arn  = module.alb.ssl_certificate_arn
+  # domain_name, ssl_certificate_arn, and hosted_zone_id removed for default CloudFront domain
 }

@@ -30,6 +30,12 @@ resource "aws_ssm_parameter" "stripe_price_id" {
   value = var.stripe_price_id
 }
 
+resource "aws_ssm_parameter" "your_domain" {
+  name  = "/${var.project_name}/backend/your_domain"
+  type  = "String"
+  value = var.your_domain
+}
+
 
 # Firebase Backend Parameter - Complete Service Account JSON
 resource "aws_ssm_parameter" "firebase_service_account" {
@@ -238,10 +244,10 @@ resource "aws_ecs_task_definition" "frontend" {
 
       healthCheck = {
         command     = ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
-        interval    = 30
-        timeout     = 5
-        retries     = 3
-        startPeriod = 60
+        interval    = 60
+        timeout     = 30
+        retries     = 5
+        startPeriod = 120
       }
 
       essential = true
@@ -300,6 +306,10 @@ resource "aws_ecs_task_definition" "backend" {
         {
           name      = "OPENAI_API_KEY"
           valueFrom = "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/${var.project_name}/backend/openai_api_key"
+        },
+        {
+          name      = "YOUR_DOMAIN"
+          valueFrom = "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/${var.project_name}/backend/your_domain"
         }
       ]
 
@@ -315,7 +325,7 @@ resource "aws_ecs_task_definition" "backend" {
       healthCheck = {
         command     = ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
         interval    = 30
-        timeout     = 5
+        timeout     = 10
         retries     = 3
         startPeriod = 60
       }

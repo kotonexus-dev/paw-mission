@@ -1,13 +1,23 @@
-# We don't need OAC for ALB origins (only for S3)
-# OAC is used for S3 origins, not for custom origins like ALB
+# Provider for us-east-1 (required for CloudFront certificates)
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+      configuration_aliases = [aws.us_east_1]
+    }
+  }
+}
 
-# CloudFront Distribution
+# Custom SSL certificates removed - using CloudFront default domain and certificate
+
+# CloudFront Distribution - using default CloudFront domain
 resource "aws_cloudfront_distribution" "main" {
   enabled             = true
   is_ipv6_enabled     = true
   comment             = "${var.project_name} CDN"
-  default_root_object = "index.html"
-  aliases             = [var.domain_name, "www.${var.domain_name}"]
+  # Remove default_root_object to prevent redirect issues with Next.js
+  # aliases removed - using default xxxxx.cloudfront.net domain
   price_class         = "PriceClass_100"  # Use only North America and Europe (cheapest)
 
   # Origin configuration (ALB)
@@ -20,18 +30,12 @@ resource "aws_cloudfront_distribution" "main" {
     custom_origin_config {
       http_port              = 80
       https_port             = 443
-      origin_protocol_policy = "https-only"
+      origin_protocol_policy = "http-only"
       origin_ssl_protocols   = ["TLSv1.2"]
-    }
-
-    # Add custom headers to identify CloudFront requests
-    custom_header {
-      name  = "X-CloudFront-Origin"
-      value = var.project_name
     }
   }
 
-  # Default cache behavior
+  # Default cache behavior - no caching for dynamic Next.js content
   default_cache_behavior {
     allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods         = ["GET", "HEAD", "OPTIONS"]
@@ -39,10 +43,10 @@ resource "aws_cloudfront_distribution" "main" {
     compress               = true
     viewer_protocol_policy = "redirect-to-https"
 
-    # Cache settings
-    cache_policy_id = data.aws_cloudfront_cache_policy.caching_optimized.id
+    # Disable caching for dynamic content
+    cache_policy_id = data.aws_cloudfront_cache_policy.caching_disabled.id
     
-    # Forward all headers for dynamic content, but cache static assets
+    # Forward all headers for dynamic content
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_s3_origin.id
   }
 
@@ -86,11 +90,9 @@ resource "aws_cloudfront_distribution" "main" {
     }
   }
 
-  # SSL Certificate from ACM
+  # Default CloudFront SSL Certificate
   viewer_certificate {
-    acm_certificate_arn      = var.ssl_certificate_arn
-    ssl_support_method       = "sni-only"
-    minimum_protocol_version = "TLSv1.2_2021"
+    cloudfront_default_certificate = true
   }
 
   # Logging (optional, disabled to avoid costs)
@@ -103,16 +105,16 @@ resource "aws_cloudfront_distribution" "main" {
   tags = {
     Name = "${var.project_name}-cloudfront"
   }
-
-  # Ensure certificate is validated before creating distribution
-  depends_on = [
-    var.ssl_certificate_arn
-  ]
 }
 
 # Managed Cache Policy for optimized caching
 data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
+}
+
+# Managed Cache Policy for disabled caching
+data "aws_cloudfront_cache_policy" "caching_disabled" {
+  name = "Managed-CachingDisabled"
 }
 
 # Managed Origin Request Policy for CORS

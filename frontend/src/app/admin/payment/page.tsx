@@ -11,9 +11,7 @@ import { toast } from 'sonner';
 export default function PaymentPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const user = useAuth();
-
-  // console.log('[PaymentPage] User:', user.currentUser);
+  const { currentUser, loading: authLoading } = useAuth();
 
   const features = [
     {
@@ -36,8 +34,7 @@ export default function PaymentPage() {
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      // console.log('firebaseUidを確認:', user.currentUser?.uid);
-      const token = await user.currentUser?.getIdToken(); // FirebaseのIDトークンを取得
+      const token = await currentUser?.getIdToken(); // FirebaseのIDトークンを取得
 
       if (!token) {
         // console.error(
@@ -55,7 +52,7 @@ export default function PaymentPage() {
           },
 
           body: JSON.stringify({
-            firebase_uid: user.currentUser?.uid,
+            firebase_uid: currentUser?.uid,
           }),
         }
       );
@@ -80,6 +77,24 @@ export default function PaymentPage() {
       setLoading(false);
     }
   };
+
+  // 認証ローディング中は早期リターン
+  if (authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4" />
+          <p className="text-orange-600">認証確認中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 未認証の場合は welcome に遷移して早期リターン
+  if (!currentUser) {
+    router.push('/onboarding/welcome');
+    return null;
+  }
 
   return (
     <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
