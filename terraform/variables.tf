@@ -34,6 +34,12 @@ variable "database_password" {
   sensitive   = true
 }
 
+variable "DATABASE_URL" {
+  description = "Complete PostgreSQL connection string"
+  type        = string
+  sensitive   = true
+}
+
 # AWS Account ID
 variable "aws_account_id" {
   description = "AWS Account ID"
@@ -102,21 +108,23 @@ variable "firebase_service_account" {
   sensitive   = true
 }
 
-# Domain configuration
+# Domain configuration (optional - using CloudFront default domain)
 variable "domain_name" {
-  description = "Domain name for the application"
+  description = "Domain name for the application (optional)"
   type        = string
-  default     = "paw-mission.com"
+  default     = ""
 }
 
 variable "your_domain" {
-  description = "Your domain URL"
+  description = "Your domain URL (will be set to CloudFront URL)"
   type        = string
+  default     = ""
 }
 
 variable "allowed_origins" {
-  description = "Allowed CORS origins"
+  description = "Allowed CORS origins (will be set to CloudFront URL)"
   type        = string
+  default     = ""
 }
 
 # Frontend configuration
@@ -126,6 +134,7 @@ variable "next_public_s3_bucket_url" {
 }
 
 variable "next_public_api_url" {
-  description = "API URL for frontend"
+  description = "API URL for frontend (will be set to CloudFront URL)"
   type        = string
+  default     = ""
 }

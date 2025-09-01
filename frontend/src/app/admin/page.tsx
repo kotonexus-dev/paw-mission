@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useCareSettings } from '@/hooks/useCareSettings';
 import { useCareLogs } from '@/hooks/useCareLogs';
-// import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { getAuth, signOut } from 'firebase/auth';
 
 export default function AdminPage() {
@@ -41,8 +41,8 @@ export default function AdminPage() {
   const [consecutiveDays, setConsecutiveDays] = useState<number | null>(null);
   const [targetDays, setTargetDays] = useState<number>(0);
   const [childName, setChildName] = useState<string>('');
-  // const user = useAuth();
-  // console.log('[AdminPage] User:', user.currentUser);
+  const { currentUser, loading: authLoading } = useAuth();
+
 
   // ログアウト処理
   const handleLogout = () => {
@@ -195,8 +195,24 @@ export default function AdminPage() {
     );
   };
 
-  // console.log('adminページでcareLog確認:', careLog);
-  // console.log('adminページでcareSettings確認:', careSettings);
+  // 認証ローディング中は早期リターン
+  if (authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4" />
+          <p className="text-orange-600">認証確認中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 未認証の場合は welcome に遷移して早期リターン
+  if (!currentUser) {
+    router.push('/onboarding/welcome');
+    return null;
+  }
+
   return (
     <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
       <div className="w-full max-w-xs">

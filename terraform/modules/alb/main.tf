@@ -63,73 +63,13 @@ resource "aws_lb_target_group" "backend" {
   }
 }
 
-# ACM Certificate with DNS validation
-resource "aws_acm_certificate" "main" {
-  domain_name               = var.domain_name
-  subject_alternative_names = ["www.${var.domain_name}"]
-  validation_method         = "DNS"
+# SSL certificates removed - CloudFront will handle HTTPS
 
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  tags = {
-    Name = "${var.project_name}-acm-cert"
-  }
-}
-
-# Route 53 validation records
-resource "aws_route53_record" "cert_validation" {
-  for_each = {
-    for dvo in aws_acm_certificate.main.domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
-  }
-
-  allow_overwrite = true
-  name            = each.value.name
-  records         = [each.value.record]
-  ttl             = 60
-  type            = each.value.type
-  zone_id         = var.hosted_zone_id
-}
-
-# Certificate validation
-resource "aws_acm_certificate_validation" "main" {
-  certificate_arn         = aws_acm_certificate.main.arn
-  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
-
-  timeouts {
-    create = "5m"
-  }
-}
-
-# HTTP Listener (redirect to HTTPS)
+# HTTP Listener (only HTTP:80 - CloudFront will handle HTTPS)
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
   port              = "80"
   protocol          = "HTTP"
-
-  default_action {
-    type = "redirect"
-
-    redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
-}
-
-# HTTPS Listener
-resource "aws_lb_listener" "https" {
-  load_balancer_arn = aws_lb.main.arn
-  port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-TLS-1-2-2017-01"
-  certificate_arn   = aws_acm_certificate_validation.main.certificate_arn
 
   default_action {
     type             = "forward"
@@ -137,36 +77,14 @@ resource "aws_lb_listener" "https" {
   }
 }
 
-# ALB Listener Rule for Backend API (HTTPS)
-resource "aws_lb_listener_rule" "backend_https" {
-  listener_arn = aws_lb_listener.https.arn
+# ALB Listener Rule for Backend API (HTTP)
+resource "aws_lb_listener_rule" "backend_http" {
+  listener_arn = aws_lb_listener.http.arn
   priority     = 100
 
   action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.backend.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/api/*", "/health"]
-    }
-  }
-}
-
-# ALB Listener Rule for Backend API (HTTP - redirect to HTTPS)
-resource "aws_lb_listener_rule" "backend_http_redirect" {
-  listener_arn = aws_lb_listener.http.arn
-  priority     = 100
-
-  action {
-    type = "redirect"
-
-    redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
   }
 
   condition {

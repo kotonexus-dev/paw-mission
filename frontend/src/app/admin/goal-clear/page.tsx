@@ -5,14 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Trophy, Star, Sparkles } from 'lucide-react';
-// import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function GoalClearPage() {
   const router = useRouter();
   const [showAnimation, setShowAnimation] = useState(false);
-  // const user = useAuth();
-
-  // console.log('[GoalClearPage] User:', user.currentUser);
+  const { currentUser, loading: authLoading } = useAuth();
 
   useEffect(() => {
     setShowAnimation(true);
@@ -24,6 +22,24 @@ export default function GoalClearPage() {
 
     return () => clearTimeout(timeout);
   }, [router]);
+
+  // 認証ローディング中は早期リターン
+  if (authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4" />
+          <p className="text-orange-600">認証確認中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 未認証の場合は welcome に遷移して早期リターン
+  if (!currentUser) {
+    router.push('/onboarding/welcome');
+    return null;
+  }
 
   return (
     <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-6 py-8">

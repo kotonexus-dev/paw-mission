@@ -37,18 +37,16 @@ export default function ReflectionsPage() {
     description: '',
   }); // ダイアログ内容
   const [error, setError] = useState(''); // エラーメッセージ表示用
-  const user = useAuth();
-
-  // console.log('[ReflectionsPage] User:', user.currentUser);
+  const { currentUser, loading: authLoading } = useAuth();
 
   // Firebase認証ヘッダーを取得する関数
   const getAuthHeaders = useCallback(async (): Promise<
     Record<string, string>
   > => {
-    if (!user.currentUser) return {};
+    if (!currentUser) return {};
 
     try {
-      const idToken = await user.currentUser.getIdToken();
+      const idToken = await currentUser.getIdToken();
       return {
         Authorization: `Bearer ${idToken}`,
         'Content-Type': 'application/json',
@@ -57,12 +55,12 @@ export default function ReflectionsPage() {
       // console.error('IDトークンの取得に失敗しました:', err);
       return {};
     }
-  }, [user.currentUser]);
+  }, [currentUser]);
 
   useEffect(() => {
     const fetchReflectionNotes = async () => {
       // ユーザーが認証されていない場合は実行しない
-      if (!user.currentUser) {
+      if (!currentUser) {
         setIsLoading(false);
         return;
       }
@@ -93,7 +91,7 @@ export default function ReflectionsPage() {
     };
 
     fetchReflectionNotes();
-  }, [user.currentUser, getAuthHeaders]);
+  }, [currentUser, getAuthHeaders]);
 
   // お世話再チャレンジ承認ハンドラー
   const handleApproveRechallenge = async () => {
@@ -328,6 +326,24 @@ export default function ReflectionsPage() {
     setShowDialog(false);
     router.push('/dashboard');
   };
+
+  // 認証ローディング中は早期リターン
+  if (authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4" />
+          <p className="text-orange-600">認証確認中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 未認証の場合は welcome に遷移して早期リターン
+  if (!currentUser) {
+    router.push('/onboarding/welcome');
+    return null;
+  }
 
   return (
     <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 sm:px-6 py-6">

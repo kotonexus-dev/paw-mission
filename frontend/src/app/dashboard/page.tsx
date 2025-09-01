@@ -13,6 +13,7 @@ import {
   Star,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { auth } from '@/lib/firebase/config';
 import {
   Dialog,
   DialogContent,
@@ -199,9 +200,9 @@ export default function DashboardPage() {
         setLoading(false);
         setCareSettingsLoading(false);
 
-        // 認証が完了していない場合はログインページへ
+        // 認証が完了していない場合は welcome ページへ
         if (!currentUser) {
-          router.push('/onboarding/login');
+          router.push('/onboarding/welcome');
         }
       }
     }, 15000); // 15秒
@@ -258,6 +259,18 @@ export default function DashboardPage() {
           //   '[Dashboard] care_settings が見つかりません（新規ユーザー）'
           // );
           // 新規ユーザーの場合、onboarding にリダイレクト
+          router.push('/onboarding/welcome');
+        } else if (res.status === 401) {
+          // 認証エラーの場合
+          try {
+            // Firebase認証をクリア
+            await auth.signOut();
+            // ローカルストレージとセッションストレージをクリア
+            localStorage.clear();
+            sessionStorage.clear();
+          } catch (error) {
+            console.error('認証クリアエラー:', error);
+          }
           router.push('/onboarding/welcome');
         } else {
           // console.error(`[Dashboard] care_settings取得失敗: ${res.status}`);
@@ -404,7 +417,16 @@ export default function DashboardPage() {
             // console.error(
             //   '[Dashboard] 認証エラー: Firebase token が無効または期限切れです'
             // );
-            router.push('/onboarding/login');
+            try {
+              // Firebase認証をクリア
+              await auth.signOut();
+              // ローカルストレージとセッションストレージをクリア
+              localStorage.clear();
+              sessionStorage.clear();
+            } catch (error) {
+              console.error('認証クリアエラー:', error);
+            }
+            router.push('/onboarding/welcome');
             return;
           }
 
@@ -684,10 +706,10 @@ export default function DashboardPage() {
                 認証が必要です
               </div>
               <Button
-                onClick={() => router.push('/onboarding/login')}
+                onClick={() => router.push('/onboarding/welcome')}
                 className="bg-orange-500 hover:bg-orange-600 text-white"
               >
-                ログインページへ
+                ホームへ戻る
               </Button>
             </div>
           );
@@ -705,12 +727,35 @@ export default function DashboardPage() {
               <div className="text-lg text-red-600 font-bold mb-4">
                 ユーザー情報の取得に失敗しました
               </div>
-              <Button
-                onClick={() => window.location.reload()}
-                className="bg-orange-500 hover:bg-orange-600 text-white"
-              >
-                再読み込み
-              </Button>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => window.location.reload()}
+                  className="bg-orange-500 hover:bg-orange-600 text-white block w-full"
+                >
+                  再読み込み
+                </Button>
+                <Button
+                  onClick={async () => {
+                    try {
+                      // Firebase認証をクリア
+                      await auth.signOut();
+                      // ローカルストレージとセッションストレージをクリア
+                      localStorage.clear();
+                      sessionStorage.clear();
+                      // Welcomeページにリダイレクト
+                      router.push('/onboarding/welcome');
+                    } catch (error) {
+                      console.error('ログアウトエラー:', error);
+                      // エラーが発生してもリダイレクトは実行
+                      router.push('/onboarding/welcome');
+                    }
+                  }}
+                  variant="outline"
+                  className="border-orange-500 text-orange-500 hover:bg-orange-50 block w-full"
+                >
+                  はじめから
+                </Button>
+              </div>
             </div>
           );
         }

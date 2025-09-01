@@ -73,6 +73,11 @@ variable "stripe_price_id" {
   type        = string
 }
 
+variable "your_domain" {
+  description = "Your domain URL for Stripe callbacks"
+  type        = string
+}
+
 
 
 # Firebase Backend JSON

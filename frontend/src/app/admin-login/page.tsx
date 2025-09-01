@@ -32,9 +32,7 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
   const [isLoading, setIsLoading] = useState(false); // ローディング状態管理
-  const user = useAuth();
-
-  // console.log('[AdminLoginPage] User:', user.currentUser);
+  const { currentUser, loading: authLoading } = useAuth();
 
   // フォーム送信時のPIN認証処理
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,13 +51,13 @@ export default function AdminLoginPage() {
     setIsLoading(true); // ローディング開始
 
     try {
-      if (!user.currentUser) {
+      if (!currentUser) {
         setError('ログイン情報が見つかりません');
         setIsLoading(false);
         return;
       }
 
-      const idToken = await user.currentUser.getIdToken(); // Firebase IDトークン取得
+      const idToken = await currentUser.getIdToken(); // Firebase IDトークン取得
 
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
       const res = await fetch(`${API_BASE_URL}/api/care_settings/verify_pin`, {
@@ -101,6 +99,24 @@ export default function AdminLoginPage() {
       setIsLoading(false); // エラー時はローディング終了
     }
   };
+
+  // 認証ローディング中は早期リターン
+  if (authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4" />
+          <p className="text-orange-600">認証確認中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 未認証の場合は welcome に遷移して早期リターン
+  if (!currentUser) {
+    router.push('/onboarding/welcome');
+    return null;
+  }
 
   return (
     <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-6 py-8">

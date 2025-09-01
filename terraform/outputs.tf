@@ -4,17 +4,29 @@ output "alb_dns_name" {
   value       = module.alb.alb_dns_name
 }
 
-# Application HTTPS URL
-output "application_url" {
-  description = "HTTPS URL of the Application"
-  value       = module.alb.alb_url
+# ALB HTTP URL
+output "alb_http_url" {
+  description = "HTTP URL of the ALB (for testing)"
+  value       = "http://${module.alb.alb_dns_name}"
 }
 
-# Route 53 Name Servers
-output "name_servers" {
-  description = "Name servers for the domain"
-  value       = module.route53.name_servers
+# CloudFront domain name
+output "cloudfront_domain_name" {
+  description = "CloudFront distribution domain name"
+  value       = module.cloudfront.cloudfront_domain_name
 }
+
+# Application HTTPS URL (CloudFront)
+output "application_url" {
+  description = "HTTPS URL of the Application via CloudFront"
+  value       = "https://${module.cloudfront.cloudfront_domain_name}"
+}
+
+# Route 53 Name Servers - disabled for CloudFront default domain
+# output "name_servers" {
+#   description = "Name servers for the domain"
+#   value       = module.route53.name_servers
+# }
 
 # ALB Zone ID
 output "alb_zone_id" {
@@ -92,4 +104,25 @@ output "backend_ecs_security_group_id" {
 output "rds_security_group_id" {
   description = "ID of the RDS security group"
   value       = module.security.rds_security_group_id
+}
+
+# ECR Repository outputs
+output "frontend_ecr_repository_url" {
+  description = "URL of the frontend ECR repository"
+  value       = module.ecr.frontend_repository_url
+}
+
+output "backend_ecr_repository_url" {
+  description = "URL of the backend ECR repository"
+  value       = module.ecr.backend_repository_url
+}
+
+output "frontend_ecr_repository_name" {
+  description = "Name of the frontend ECR repository"
+  value       = module.ecr.frontend_repository_name
+}
+
+output "backend_ecr_repository_name" {
+  description = "Name of the backend ECR repository"
+  value       = module.ecr.backend_repository_name
 }

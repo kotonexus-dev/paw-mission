@@ -1,0 +1,141 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # 手動でも実行可能
+
+env:
+  AWS_REGION: ap-northeast-1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.5.0"
+
+    - name: Terraform Init
+      working-directory: ./terraform
+      run: terraform init
+
+    - name: Terraform Plan
+      working-directory: ./terraform
+      run: terraform plan -out=tfplan
+
+    - name: Terraform Apply (Infrastructure)
+      working-directory: ./terraform
+      run: terraform apply -auto-approve tfplan
+
+    - name: Get ECR repository URLs
+      working-directory: ./terraform
+      run: |
+        echo "FRONTEND_ECR_URL=$(terraform output -raw frontend_ecr_repository_url)" >> $GITHUB_ENV
+        echo "BACKEND_ECR_URL=$(terraform output -raw backend_ecr_repository_url)" >> $GITHUB_ENV
+        echo "FRONTEND_REPO_NAME=$(terraform output -raw frontend_ecr_repository_name)" >> $GITHUB_ENV
+        echo "BACKEND_REPO_NAME=$(terraform output -raw backend_ecr_repository_name)" >> $GITHUB_ENV
+        
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Get Terraform variables
+      working-directory: ./terraform
+      run: |
+        # terraform.tfvarsから環境変数を読み込み
+        while IFS= read -r line; do
+          if [[ ! "$line" =~ ^[[:space:]]*# ]] && [[ "$line" =~ ^[[:space:]]*([^=]+)[[:space:]]*=[[:space:]]*\"?([^\"]+)\"?[[:space:]]*$ ]]; then
+            key=$(echo "${BASH_REMATCH[1]}" | xargs)
+            value=$(echo "${BASH_REMATCH[2]}" | xargs | sed 's/^"\|"$//g')
+            echo "${key}=${value}" >> $GITHUB_ENV
+          fi
+        done < terraform.tfvars
+
+    - name: Build and push Frontend Docker image
+      working-directory: ./frontend
+      run: |
+        # Build frontend with build args
+        docker build \
+          --build-arg NEXT_PUBLIC_API_URL="${next_public_api_url}" \
+          --build-arg NEXT_PUBLIC_FIREBASE_API_KEY="${firebase_api_key}" \
+          --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="${firebase_auth_domain}" \
+          --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID="${firebase_project_id}" \
+          --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="${firebase_storage_bucket}" \
+          --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="${firebase_messaging_sender_id}" \
+          --build-arg NEXT_PUBLIC_FIREBASE_APP_ID="${firebase_app_id}" \
+          --build-arg NEXT_PUBLIC_S3_BUCKET_URL="${next_public_s3_bucket_url}" \
+          -t $FRONTEND_ECR_URL:latest \
+          -t $FRONTEND_ECR_URL:${{ github.sha }} \
+          .
+        
+        # Push images
+        docker push $FRONTEND_ECR_URL:latest
+        docker push $FRONTEND_ECR_URL:${{ github.sha }}
+
+    - name: Build and push Backend Docker image
+      working-directory: ./backend
+      run: |
+        # Build backend
+        docker build \
+          -t $BACKEND_ECR_URL:latest \
+          -t $BACKEND_ECR_URL:${{ github.sha }} \
+          .
+        
+        # Push images
+        docker push $BACKEND_ECR_URL:latest
+        docker push $BACKEND_ECR_URL:${{ github.sha }}
+
+    - name: Update ECS services
+      run: |
+        # フロントエンドサービスを強制更新
+        aws ecs update-service \
+          --cluster $(terraform -chdir=terraform output -raw ecs_cluster_name) \
+          --service $(terraform -chdir=terraform output -raw frontend_service_name) \
+          --force-new-deployment \
+          --region $AWS_REGION
+        
+        # バックエンドサービスを強制更新
+        aws ecs update-service \
+          --cluster $(terraform -chdir=terraform output -raw ecs_cluster_name) \
+          --service $(terraform -chdir=terraform output -raw backend_service_name) \
+          --force-new-deployment \
+          --region $AWS_REGION
+
+    - name: Wait for deployment to complete
+      run: |
+        echo "Waiting for ECS services to stabilize..."
+        
+        # フロントエンドサービスの安定化を待機
+        aws ecs wait services-stable \
+          --cluster $(terraform -chdir=terraform output -raw ecs_cluster_name) \
+          --services $(terraform -chdir=terraform output -raw frontend_service_name) \
+          --region $AWS_REGION
+        
+        # バックエンドサービスの安定化を待機
+        aws ecs wait services-stable \
+          --cluster $(terraform -chdir=terraform output -raw ecs_cluster_name) \
+          --services $(terraform -chdir=terraform output -raw backend_service_name) \
+          --region $AWS_REGION
+
+    - name: Deployment Success
+      run: |
+        echo "🎉 Deployment completed successfully!"
+        echo "Application URL: $(terraform -chdir=terraform output -raw application_url)"
+        
+        # CloudFrontのキャッシュクリア（オプション）
+        # DISTRIBUTION_ID=$(terraform -chdir=terraform output -raw cloudfront_distribution_id)
+        # aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"

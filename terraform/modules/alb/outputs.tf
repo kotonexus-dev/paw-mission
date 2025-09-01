@@ -3,9 +3,9 @@ output "alb_dns_name" {
   value       = aws_lb.main.dns_name
 }
 
-output "alb_url" {
-  description = "HTTPS URL of the Application Load Balancer"
-  value       = "https://${var.domain_name}"
+output "alb_http_url" {
+  description = "HTTP URL of the Application Load Balancer"
+  value       = "http://${aws_lb.main.dns_name}"
 }
 
 output "alb_zone_id" {
@@ -28,7 +28,8 @@ output "backend_target_group_arn" {
   value       = aws_lb_target_group.backend.arn
 }
 
-output "ssl_certificate_arn" {
-  description = "ARN of the SSL certificate"
-  value       = aws_acm_certificate_validation.main.certificate_arn
-}
+# SSL certificate removed for CloudFront default domain setup
+# output "ssl_certificate_arn" {
+#   description = "ARN of the SSL certificate"
+#   value       = aws_acm_certificate_validation.main.certificate_arn
+# }

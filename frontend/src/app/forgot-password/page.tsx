@@ -15,14 +15,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dog, Mail, ArrowLeft } from 'lucide-react';
-// import { useAuth } from '@/context/AuthContext';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
-  // const user = useAuth();
-
-  // console.log('[ForgotPasswordPage] User:', user.currentUser);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +80,7 @@ export default function ForgotPasswordPage() {
             )}
           </CardContent>
           <CardFooter className="flex justify-center pb-6">
-            <Link href="/login">
+            <Link href="/onboarding/login">
               <Button variant="outline" className="flex items-center">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 ログイン画面に戻る

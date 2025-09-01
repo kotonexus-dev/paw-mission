@@ -4,8 +4,9 @@ variable "project_name" {
 }
 
 variable "domain_name" {
-  description = "Domain name for the CloudFront distribution"
+  description = "Domain name for the CloudFront distribution (optional)"
   type        = string
+  default     = ""
 }
 
 variable "alb_dns_name" {
@@ -14,6 +15,13 @@ variable "alb_dns_name" {
 }
 
 variable "ssl_certificate_arn" {
-  description = "ARN of the SSL certificate from ACM"
+  description = "ARN of the SSL certificate from ACM (optional)"
   type        = string
+  default     = ""
+}
+
+variable "hosted_zone_id" {
+  description = "Route53 hosted zone ID for certificate validation (optional)"
+  type        = string
+  default     = ""
 }
